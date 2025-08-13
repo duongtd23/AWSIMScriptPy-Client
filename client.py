@@ -339,9 +339,12 @@ class AWSIMScriptClient:
         self.ready_for_new_script = False
 
     def execute(self):
-        script_files = [str(f) for f in self.dir_path.glob("*.script") if f.is_file()]
+        script_files = sorted(
+            [f for f in self.dir_path.glob("*.script") if f.is_file()],
+            key=lambda f: f.name
+        )
         for script_file in script_files:
-            self.node.send_request(script_file)
+            self.node.send_request(str(script_file))
             time.sleep(15)
             self.loop_wait()
             self.reset()
