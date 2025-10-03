@@ -10,7 +10,6 @@ from aw_monitor.srv import *
 from autoware_adapi_v1_msgs.srv import InitializeLocalization, ChangeOperationMode, ClearRoute
 from autoware_vehicle_msgs.msg import Engage
 import utils
-from network import Network
 from tier4_planning_msgs.msg import VelocityLimit
 from aw_monitor.srv import *
 
