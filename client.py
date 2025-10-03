@@ -2,6 +2,7 @@ import argparse
 import json, time, os, sys
 from enum import Enum
 from pathlib import Path
+from network import *
 
 import rclpy
 from rclpy.node import Node
@@ -12,6 +13,7 @@ from aw_monitor.srv import *
 from autoware_adapi_v1_msgs.srv import InitializeLocalization, ChangeOperationMode, ClearRoute
 from autoware_vehicle_msgs.msg import Engage
 import utils
+from network import Network
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -145,6 +147,13 @@ class ClientNode(Node):
             DynamicControl,
             '/dynamic_control/vehicle/removing_srv',
         )
+
+        self.map_network_client = self.create_client(
+            DynamicControl,
+            '/dynamic_control/map/network',
+        )
+
+        self.network = self.send_map_network_req()
 
 
     def send_request(self, file_path):
@@ -326,6 +335,18 @@ class ClientNode(Node):
             self.client_op_status_publisher.publish(msg)
             self.published_finish_signal = True
 
+    def send_map_network_req(self):
+        """
+        :return: instance of network.Network
+        """
+        req = DynamicControl.Request()
+        req.json_request = ""
+        future = self.map_network_client.call_async(req)
+        rclpy.spin_until_future_complete(self, future)
+        response = future.result()
+
+        return Network(response.status.message)
+
 class AWSIMScriptClient:
     def __init__(self, node, dir_path, wait_writing_trace):
         """
@@ -373,6 +394,19 @@ class AWSIMScriptClient:
         self.node.ego_motion_state = MOTION_STATE_STOPPED
         self.node.published_finish_signal = False
 
+def loop_wait(node):
+    while True:
+        node.upd_execution_state()
+        if node.ads_internal_status == AdsInternalStatus.GOAL_ARRIVED:
+            node.publish_finish_signal()
+            break
+        print("[INFO] Waiting Ego arrive goal.")
+        time.sleep(5)
+
+    node.clear_route()
+    node.remove_npcs()
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description='AWSIM-Script client.')
     parser.add_argument(
@@ -397,6 +431,8 @@ if __name__ == '__main__':
         AWSIMScriptClient(node, full_path, to_wait_writing_trace).execute()
     elif os.path.isfile(full_path):
         node.send_request(full_path)
+        time.sleep(15)
+        loop_wait(node)
     else:
         print('[ERROR] File or directory not found.')
 
