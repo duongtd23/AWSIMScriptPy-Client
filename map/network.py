@@ -1,6 +1,5 @@
-import json
 from typing import List
-from traffic_lane import *
+from map.traffic_lane import *
 import numpy as np
 
 class LaneOffset:
