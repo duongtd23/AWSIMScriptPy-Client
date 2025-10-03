@@ -1,7 +1,10 @@
+import json
 from enum import Enum
-import numpy as np
 from typing import Optional, Tuple
 import math
+
+import utils
+
 
 class TurnDirection(Enum):
     UNDEFINED = 0
@@ -23,6 +26,12 @@ class TrafficLane:
 
         # self.stop_line = None   TODO: parse this info
         # self.right_of_way_lanes = []   TODO: parse this info
+
+    @classmethod
+    def from_dict(cls, dict_obj):
+        way_points = [utils.dict_to_point_obj(p) for p in dict_obj['waypoints']]
+        return cls(dict_obj['id'], dict_obj['turn_direction'], dict_obj['speed_limit'],
+                   way_points, dict_obj['next_lanes'], dict_obj['prev_lanes'])
 
     def is_intersection_lane(self):
         return self.turn_direction != TurnDirection.UNDEFINED
