@@ -4,7 +4,7 @@ import numpy as np
 class Actor:
     def __init__(self, actor_id, client_node):
         # static properties
-        self.id = actor_id
+        self.actor_id = actor_id
         self.client_node = client_node
         self.state = {}
         self.actions = []

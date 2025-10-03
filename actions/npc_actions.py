@@ -3,6 +3,7 @@ import std_msgs, rclpy
 import json, time
 import utils
 from core.actor import NPCVehicle
+from core.client_ros_node import *
 
 class SpawnNPCVehicle(Action):
     def __init__(self, position, orientation, condition=None):
@@ -32,17 +33,17 @@ class SpawnNPCVehicle(Action):
         req.json_request = msg.data
         retry = 0
         while retry < 10:
-            future = self.node.dynamic_npc_spawning_client.call_async(req)
-            rclpy.spin_until_future_complete(self.node, future)
+            future = actor.client_node.dynamic_npc_spawning_client.call_async(req)
+            rclpy.spin_until_future_complete(actor.client_node, future)
             response = future.result()
             if response.status.success:
-                print(f"Spawned NPC vehicle {name}")
+                print(f"Spawned NPC vehicle {actor.actor_id}")
                 break
 
-            time.sleep(self.timestep)
+            time.sleep(0.4)
             retry += 1
 
         if retry >= 10:
-            self.node.get_logger().error(f"Failed to spawn NPC vehicle, error message: {response.status.message}")
+            actor.client_node.get_logger().error(f"Failed to spawn NPC vehicle, error message: {response.status.message}")
 
 

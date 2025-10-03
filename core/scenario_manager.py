@@ -13,9 +13,9 @@ class ScenarioManager:
 
     def run(self):
         while self.running:
-            global_state = {a.id: a for a in self.actors}
+            global_state = {a.actor_id: a for a in self.actors}
             for actor in self.actors:
-                actor.update_state()
+                # actor.update_state()
                 actor.tick(global_state)
 
             # if self.client_node.should_terminate():
