@@ -3,7 +3,6 @@ from core.action import *
 from core.actor import *
 from actions.ego_actions import *
 from actions.npc_actions import *
-from map.network import *
 
 class ScenarioManager:
     def __init__(self, client_node, network, actors):

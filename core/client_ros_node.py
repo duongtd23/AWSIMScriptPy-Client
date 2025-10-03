@@ -1,5 +1,5 @@
 import time, os
-from network import *
+from map.network import *
 
 import rclpy
 from rclpy.node import Node
