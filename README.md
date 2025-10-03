@@ -4,7 +4,7 @@ A client for AWSIM-Script, to be used with [AWSIM-Labs simulator](https://github
 
 ### Usage
 ```bash
-python client.py <path-to-input-script-or-folder>
+python script_file_manager.py <path-to-input-script-or-folder>
 ```
 
 Make sure to source the folder where Autoware was installed first.
