@@ -48,8 +48,9 @@ def make_swerve_scenario(network,
 
     # TODO: parse next lane
 
+
     npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))
-    npc1.add_action(FollowWaypoints(waypoints=waypoints,
+    npc1.add_action(FollowWaypoints(waypoints=[utils.array_to_dict_pos(p) for p in waypoints],
                                     condition=longitudinal_distance_to_ego_less_than(50),
                                     target_speed=npc_speed,
                                     acceleration=7))

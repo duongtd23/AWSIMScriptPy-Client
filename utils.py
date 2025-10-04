@@ -25,27 +25,27 @@ def obj_to_ros_pose(position, orientation):
     :return:
     """
     pose = Pose()
-    pose.position.x = position[0]
-    pose.position.y = position[1]
-    pose.position.z = position[2]
-    pose.orientation.x = orientation[0]
-    pose.orientation.y = orientation[1]
-    pose.orientation.z = orientation[2]
-    pose.orientation.w = orientation[3]
+    pose.position.x = float(position[0])
+    pose.position.y = float(position[1])
+    pose.position.z = float(position[2])
+    pose.orientation.x = float(orientation[0])
+    pose.orientation.y = float(orientation[1])
+    pose.orientation.z = float(orientation[2])
+    pose.orientation.w = float(orientation[3])
     return pose
 
 def array_to_dict_pos(input):
     return {
-        "x": input[0],
-        "y": input[1],
-        "z": input[2]
+        "x": float(input[0]),
+        "y": float(input[1]),
+        "z": float(input[2])
     }
 def array_to_dict_orient(input):
     return {
-        "x": input[0],
-        "y": input[1],
-        "z": input[2],
-        "w": input[3]
+        "x": float(input[0]),
+        "y": float(input[1]),
+        "z": float(input[2]),
+        "w": float(input[3])
     }
 def quaternion_from_yaw(yaw_angle_rad):
     # Assuming rotation around Z-axis only
