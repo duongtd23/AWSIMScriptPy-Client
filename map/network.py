@@ -37,7 +37,7 @@ class Network:
             if remaining_dis - np.linalg.norm(segment) < 0:
                 point = start + remaining_dis/np.linalg.norm(segment)*segment
                 yaw_angle = math.atan2(end[1] - point[1], end[0] - point[0])
-                return i, point, utils.quaternion_from_yaw(yaw_angle)
+                return i, lane, point, utils.quaternion_from_yaw(yaw_angle)
 
             remaining_dis = remaining_dis - np.linalg.norm(segment)
 

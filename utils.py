@@ -77,3 +77,19 @@ def longitudinal_distance(A, B, euler_angles):
     # Projection point H
     H = A + t * d
     return np.linalg.norm(H - A)
+
+def rotate_point(point, center, angle_radians):
+    """
+    Rotates a 2D point around a given center point.
+    :param point: np.array
+    :param center: np.array
+    :param angle_degrees:
+    :return:
+    """
+    translated_point = point - center
+    rotation_matrix = np.array([
+        [np.cos(angle_radians), -np.sin(angle_radians)],
+        [np.sin(angle_radians),  np.cos(angle_radians)]
+    ])
+    rotated_translated_point = np.dot(rotation_matrix, translated_point)
+    return rotated_translated_point + center

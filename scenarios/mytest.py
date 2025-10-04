@@ -2,10 +2,10 @@ from core.scenario_manager import *
 from core.trigger_condition import *
 
 def make_scenario(network):
-    _, init_pos, init_orient = network.parse_lane_offset(LaneOffset('355', 20))
-    _, goal_pos, goal_orient = network.parse_lane_offset(LaneOffset('214', 21))
+    _, _, init_pos, init_orient = network.parse_lane_offset(LaneOffset('355', 20))
+    _, _, goal_pos, goal_orient = network.parse_lane_offset(LaneOffset('214', 21))
 
-    _, npc_init_pos, npc_init_orient = network.parse_lane_offset(LaneOffset('205', 50))
+    _, _, npc_init_pos, npc_init_orient = network.parse_lane_offset(LaneOffset('205', 50))
 
     print(npc_init_pos)
 

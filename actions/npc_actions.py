@@ -94,7 +94,7 @@ class FollowLane(Action):
                                                  f"process follow lane action, "
                                                  f"error message: {response.status.message}.")
 
-class FollowWaypoint(Action):
+class FollowWaypoints(Action):
     def __init__(self, waypoints, condition=None,
                  target_speed=None, acceleration=None, deceleration=None):
         super().__init__(condition=condition, one_shot=True)
