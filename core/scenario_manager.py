@@ -5,7 +5,7 @@ from actions.ego_actions import *
 from actions.npc_actions import *
 
 class ScenarioManager:
-    def __init__(self, client_node, network, actors):
+    def __init__(self, client_node:ClientNode, network:Network, actors):
         self.client_node = client_node
         self.network = network
         self.actors = actors

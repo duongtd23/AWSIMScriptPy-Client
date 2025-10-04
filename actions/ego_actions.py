@@ -4,8 +4,8 @@ import utils
 from geometry_msgs.msg import Pose, PoseWithCovariance, PoseWithCovarianceStamped
 
 class SpawnEgo(Action):
-    def __init__(self, position, orientation):
-        super().__init__(condition=None, one_shot=True)
+    def __init__(self, position, orientation, condition=None):
+        super().__init__(condition=condition, one_shot=True)
         self.position = position
         self.orientation = orientation
 
@@ -41,25 +41,25 @@ class SpawnEgo(Action):
             actor.client_node.get_logger().error("Failed to localize ego.")
 
 class SetGoalPose(Action):
-    def __init__(self, position, orientation):
-        super().__init__(one_shot=True)
+    def __init__(self, position, orientation, condition=None):
+        super().__init__(one_shot=True, condition=condition)
         self.position = position
         self.orientation = orientation
 
     def _do(self, actor):
         """
         Set goal for autonomous driving
-        :param goal_position:
-        :param goal_orientation:
+        :param position:
+        :param orientation:
         :return:
         """
         ros_goal = utils.obj_to_ros_pose(self.position, self.orientation)
         actor.client_node.set_goal(ros_goal)
 
-
 class ActivateAutonomousMode(Action):
-    def __init__(self):
-        super().__init__(one_shot=True)
+    def __init__(self, condition=None):
+        super().__init__(one_shot=True, condition=condition)
 
     def _do(self, actor):
-        pass
+        actor.client_node.send_engage_cmd()
+

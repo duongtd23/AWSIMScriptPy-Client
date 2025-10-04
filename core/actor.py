@@ -1,8 +1,10 @@
 import enum
 import numpy as np
 
+from core.client_ros_node import ClientNode
+
 class Actor:
-    def __init__(self, actor_id, client_node):
+    def __init__(self, actor_id, client_node:ClientNode):
         # static properties
         self.actor_id = actor_id
         self.client_node = client_node

@@ -1,4 +1,5 @@
 from core.scenario_manager import *
+from core.trigger_condition import *
 
 def make_scenario(network):
     _, init_pos, init_orient = network.parse_lane_offset(LaneOffset('355', 30))
@@ -12,7 +13,7 @@ def make_scenario(network):
     npc1 = NPCVehicle("npc1", node, BodyStyle.VAN)
     ego.add_action(SpawnEgo(position=init_pos, orientation=init_orient))
     ego.add_action(SetGoalPose(position=goal_pos, orientation=goal_orient))
-    # ego.add_action(ActivateAutonomousMode())
+    ego.add_action(ActivateAutonomousMode(condition=autonomous_mode_ready()))
 
     # npc sequence: spawn only when ego comes closer than 20m
     npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))
