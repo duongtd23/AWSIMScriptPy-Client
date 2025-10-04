@@ -10,8 +10,7 @@ def longitudinal_distance_to_ego_less_than(threshold):
         ego_pos = np.array(ego['pose']['position'])
         ego_euler_angles = np.array(ego['pose']['rotation'])
 
-        npcs = global_state['actor-kinematics']['vehicles']
-        npc = next((n for n in npcs if n['name']==actor.actor_id), None)
+        npc = global_state['actor-kinematics']['vehicles'][actor.actor_id]
         if not npc:
             raise Exception(f'NPC {actor.actor_id} not found')
         npc_pos = np.array(npc['pose']['position'])
