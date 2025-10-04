@@ -1,17 +1,32 @@
 from core.client_ros_node import AdsInternalStatus
+import utils
+import numpy as np
 
-def distance_to_ego_less_than(threshold):
+def longitudinal_distance_to_ego_less_than(threshold):
     def _cond(actor, global_state):
-        ego = global_state['ego']
-        if not ego["position"] or not actor.state.get("position"):
+        if not global_state['actors']:
             return False
-        ex, ey, _ = ego.state['position']
-        ax, ay, _ = actor.state['position']
-        dx, dy = ex - ax, ey - ay
-        return (dx*dx + dy*dy) ** 0.5 < threshold
+        ego = global_state['actors']['ego']
+        ego_pos = np.array(ego['pose']['position'])
+        ego_euler_angles = np.array(ego['pose']['rotation'])
+
+        npcs = global_state['actors']['vehicles']
+        npc = next((n for n in npcs if n['name']==actor.actor_id), None)
+        if not npc:
+            raise Exception(f'NPC {actor.actor_id} not found')
+        npc_pos = np.array(npc['pose']['position'])
+
+        dis = utils.longitudinal_distance(ego_pos, npc_pos, ego_euler_angles)
+
+        ego_root_to_front = global_state["actor-sizes"]["ego"]["size"][0]/2 + \
+                            global_state["actor-sizes"]["ego"]["center"][0]
+        npc_root_to_front = global_state["actor-sizes"][actor.actor_id]["size"][0]/2 + \
+                            global_state["actor-sizes"][actor.actor_id]["center"][0]
+        return dis - ego_root_to_front - npc_root_to_front <= threshold
+
     return _cond
 
 def autonomous_mode_ready():
     def _cond(actor, global_state):
-        return global_state['ads_internal_status'] >= AdsInternalStatus.AUTONOMOUS_MODE_READY
+        return global_state['ads_internal_status'] >= AdsInternalStatus.AUTONOMOUS_MODE_READY.value
     return _cond

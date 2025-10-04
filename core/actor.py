@@ -25,18 +25,20 @@ class Actor:
                     self.actions.remove(action)
 
 class VehicleActor(Actor):
-    def __init__(self, actor_id, client_node, size=(5,2)):
+    def __init__(self, actor_id, client_node, size=(5,2,1.4), center=(0.0,0.0,0.0)):
         """
-        :param size: (length, width)
+        :param size: (length, width, height)
+        :param center:
         """
         # static properties
         super().__init__(actor_id, client_node)
         self.size = np.array(size)
-
+        self.center = np.array(center)
 
 class EgoVehicle(VehicleActor):
-    def __init__(self, actor_id, client_node, size=(4.88,2.00)):
-        VehicleActor.__init__(self, actor_id, client_node, size)
+    def __init__(self, client_node, size=(4.886,2.186,1.421), center=(1.424,0.0,0.973)):
+        VehicleActor.__init__(self, "ego", client_node, size)
+        self.center = np.array(center)
 
 class BodyStyle(enum.Enum):
     TAXI="taxi"
@@ -46,6 +48,16 @@ class BodyStyle(enum.Enum):
     TRUCK="truck"
 
 class NPCVehicle(VehicleActor):
-    def __init__(self, actor_id, client_node, body_style:BodyStyle, size=(5,2)):
+    def __init__(self, actor_id, client_node, body_style:BodyStyle, size=None, center=None):
+        if not size:
+            match body_style:
+                case HATCHBACK:
+                    size = (4.02,1.94,1.64)
+        if not center:
+            match body_style:
+                case HATCHBACK:
+                    center = (1.43,0.85,0.0)
+
         VehicleActor.__init__(self, actor_id, client_node, size)
         self.body_style = body_style
+        self.center = np.array(center)

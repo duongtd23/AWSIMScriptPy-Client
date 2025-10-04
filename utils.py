@@ -1,5 +1,6 @@
 from geometry_msgs.msg import Pose, PoseWithCovariance
 import numpy as np
+from scipy.spatial.transform import Rotation as R
 
 def dict_to_point_obj(input, _2D=False):
     if _2D:
@@ -53,3 +54,26 @@ def quaternion_from_yaw(yaw_angle_rad):
     qz = np.sin(yaw_angle_rad / 2.0)
     qw = np.cos(yaw_angle_rad / 2.0)
     return [qx, qy, qz, qw]
+
+def object_to_point_arr(obj):
+    return [obj.x, obj.y, obj.z]
+
+def longitudinal_distance(A, B, euler_angles):
+    """
+    distance AH, where H is the projection of H onto vector Ax and Ax has euler angles euler_angles
+    :param A:
+    :param B:
+    :param euler_angles:
+    :return:
+    """
+    # Direction from Euler
+    rot = R.from_euler('xyz', euler_angles)
+    d = rot.apply([1, 0, 0])
+    d = d / np.linalg.norm(d)
+
+    # Projection scalar
+    t = np.dot(B - A, d)
+    t = max(t, 0)
+    # Projection point H
+    H = A + t * d
+    return np.linalg.norm(H - A)

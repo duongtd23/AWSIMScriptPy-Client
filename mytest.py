@@ -9,7 +9,7 @@ def make_scenario(network):
 
     print(npc_init_pos)
 
-    ego = EgoVehicle("ego", node)
+    ego = EgoVehicle(node)
     npc1 = NPCVehicle("npc1", node, BodyStyle.VAN)
     ego.add_action(SpawnEgo(position=init_pos, orientation=init_orient))
     ego.add_action(SetGoalPose(position=goal_pos, orientation=goal_orient))
@@ -17,7 +17,7 @@ def make_scenario(network):
 
     # npc sequence: spawn only when ego comes closer than 20m
     npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))
-    # condition=distance_to_ego_less_than(20)))
+    npc1.add_action(FollowLane(condition=longitudinal_distance_to_ego_less_than(20)))
     # npc1.add_action(SetTargetSpeed(speed=5.0))
 
     return ScenarioManager(node, network,[ego, npc1])

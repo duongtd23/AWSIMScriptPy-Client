@@ -166,6 +166,11 @@ class ClientNode(Node):
             MonitorRecordingState,
             '/monitor/recording/state'
         )
+        # groundtruth states of all actors
+        self.groundtruth_kinematic_client = self.create_client(
+            GroundtruthKinematic,
+            '/simulation/gt_srv/kinematic'
+        )
         # to clear route
         self.clear_route_client = self.create_client(
             ClearRoute,
@@ -384,6 +389,16 @@ class ClientNode(Node):
             msg.data = AWSIM_CLIENT_OP_STATE_STOPPED
             self.client_op_status_publisher.publish(msg)
             self.published_finish_signal = True
+
+    def query_groundtruth_kinematics(self):
+        while not self.groundtruth_kinematic_client.wait_for_service(timeout_sec=5.0):
+            print('[WARNING] Ground truth kinematic ROS service not available, waiting...')
+
+        # Create a request
+        req = GroundtruthKinematic.Request()
+        future = self.groundtruth_kinematic_client.call_async(req)
+        rclpy.spin_until_future_complete(self, future)
+        return future.result()
 
     def send_map_network_req(self):
         """

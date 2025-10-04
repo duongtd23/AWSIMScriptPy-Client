@@ -40,10 +40,57 @@ class SpawnNPCVehicle(Action):
                 print(f"Spawned NPC vehicle {actor.actor_id}")
                 break
 
-            time.sleep(0.4)
+            time.sleep(0.5)
             retry += 1
 
         if retry >= 10:
-            actor.client_node.get_logger().error(f"Failed to spawn NPC vehicle, error message: {response.status.message}")
+            actor.client_node.get_logger().error(f"Failed to spawn NPC vehicle, "
+                                                 f"error message: {response.status.message}")
 
+class FollowLane(Action):
+    def __init__(self, condition=None, target_speed=None, acceleration=None, deceleration=None):
+        super().__init__(condition=condition, one_shot=True)
+
+        # if target_speed is None, it follows the speed limit of the current lane
+        # if acceleation/deceleration is None, the default values will be used
+        self.target_speed = target_speed
+        self.acceleration = acceleration
+        self.deceleration = deceleration
+
+    def _do(self, actor:NPCVehicle):
+        is_speed_defined = self.target_speed is not None
+        is_acceleration_defined = self.acceleration is not None
+        is_deceleration_defined = self.deceleration is not None
+        my_dict = {
+            "target": actor.actor_id,
+            "speed": self.target_speed if is_speed_defined else 0,
+            "acceleration": self.acceleration if is_acceleration_defined else 0,
+            "deceleration": self.deceleration if is_deceleration_defined else 0,
+            "is_speed_defined": is_speed_defined,
+            "is_acceleration_defined": is_acceleration_defined,
+            "is_deceleration_defined": is_deceleration_defined
+        }
+        msg = std_msgs.msg.String()
+        msg.data = json.dumps(my_dict)
+        actor.client_node.follow_lane_publisher.publish(msg)
+
+        # do a service request to confirm the command was sent and processed properly
+        retry = 0
+        req = DynamicControl.Request()
+        req.json_request = msg.data
+        while retry < 10:
+            future = actor.client_node.follow_lane_client.call_async(req)
+            rclpy.spin_until_future_complete(actor.client_node, future)
+            response = future.result()
+            if response.status.success:
+                print(f"Sent follow lane command to {actor.actor_id} successfully.")
+                break
+
+            time.sleep(0.5)
+            retry += 1
+
+        if retry == 10:
+            actor.client_node.get_logger().error(f"[ERROR] AWSIM failed to "
+                                                 f"process follow lane action, "
+                                                 f"error message: {response.status.message}.")
 
