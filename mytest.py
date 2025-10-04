@@ -2,7 +2,7 @@ from core.scenario_manager import *
 from core.trigger_condition import *
 
 def make_scenario(network):
-    _, init_pos, init_orient = network.parse_lane_offset(LaneOffset('355', 30))
+    _, init_pos, init_orient = network.parse_lane_offset(LaneOffset('355', 20))
     _, goal_pos, goal_orient = network.parse_lane_offset(LaneOffset('214', 21))
 
     _, npc_init_pos, npc_init_orient = network.parse_lane_offset(LaneOffset('205', 50))
@@ -18,7 +18,8 @@ def make_scenario(network):
 
     # npc sequence: spawn only when ego comes closer than 20m
     npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))
-    npc1.add_action(FollowLane(condition=longitudinal_distance_to_ego_less_than(20)))
+    npc1.add_action(FollowLane(condition=longitudinal_distance_to_ego_less_than(50),
+                               target_speed=10))
     # npc1.add_action(SetTargetSpeed(speed=5.0))
 
     return ScenarioManager(node, network,[ego, npc1])

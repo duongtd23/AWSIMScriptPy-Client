@@ -1,3 +1,5 @@
+import time
+
 from core.action import Action
 import utils
 
@@ -31,6 +33,7 @@ class SpawnEgo(Action):
         msg.pose.covariance = cov
 
         actor.client_node.ego_pose_publisher.publish(msg)
+        time.sleep(1)
 
         ok = actor.client_node.re_localization(ros_pose, cov)
         if ok:
@@ -54,6 +57,7 @@ class SetGoalPose(Action):
         :param orientation:
         :return:
         """
+        time.sleep(1)
         ros_goal = utils.obj_to_ros_pose(self.position, self.orientation)
         actor.client_node.set_goal(ros_goal)
 
