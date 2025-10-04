@@ -406,8 +406,10 @@ class ClientNode(Node):
         """
         req = DynamicControl.Request()
         req.json_request = ""
+        self.get_logger().info(f"Sending Map Network Request")
         future = self.map_network_client.call_async(req)
         rclpy.spin_until_future_complete(self, future)
         response = future.result()
+        self.get_logger().info(f"Map Network Response: {response.status.success}")
 
         return Network(response.status.message)

@@ -46,6 +46,8 @@ class ScenarioManager:
             if self.global_state["ads_internal_status"] == AdsInternalStatus.GOAL_ARRIVED.value:
                 self.terminate()
 
+            time.sleep(0.1)
+
     def terminate(self):
         self.running = False
 
