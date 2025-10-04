@@ -23,17 +23,6 @@ class ScenarioManager:
         self.global_state = {
             "ads_internal_status": AdsInternalStatus.UNINITIALIZED.value,
             "ego_motion_state": MOTION_STATE_STOPPED,
-            # "actor-sizes": {  # hard code. TODO: fix this
-            #     "ego": {
-            #         "size": [4.886,2.186,1.421],
-            #         "center": [1.424,0.0,0.973]
-            #     },
-            #     "npc1": {
-            #         "size": [4.02,1.94,1.64],
-            #         "center": [1.43,0.85,0.0]
-            #     }
-            # },
-            # "actor-kinematics": {}
         }
 
     def run(self):
@@ -134,4 +123,4 @@ def gt_size_msg_to_dict(msg):
             "center": utils.object_to_point_arr(size_obj.center),
         }
 
-    return {v.name: size_obj_to_dict(v) for v in msg.vehicle_sizes},
+    return {v.name: size_obj_to_dict(v) for v in msg.vehicle_sizes}

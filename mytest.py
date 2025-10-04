@@ -14,6 +14,7 @@ def make_scenario(network):
     ego.add_action(SpawnEgo(position=init_pos, orientation=init_orient))
     ego.add_action(SetGoalPose(position=goal_pos, orientation=goal_orient))
     ego.add_action(ActivateAutonomousMode(condition=autonomous_mode_ready()))
+    ego.add_action(SetVelocityLimit(35/3.6))
 
     # npc sequence: spawn only when ego comes closer than 20m
     npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))

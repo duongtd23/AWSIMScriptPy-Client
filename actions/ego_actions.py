@@ -2,6 +2,7 @@ from core.action import Action
 import utils
 
 from geometry_msgs.msg import Pose, PoseWithCovariance, PoseWithCovarianceStamped
+from tier4_planning_msgs.msg import VelocityLimit
 
 class SpawnEgo(Action):
     def __init__(self, position, orientation, condition=None):
@@ -62,4 +63,20 @@ class ActivateAutonomousMode(Action):
 
     def _do(self, actor):
         actor.client_node.send_engage_cmd()
+
+class SetVelocityLimit(Action):
+    def __init__(self, max_velocity, condition=None, one_shot=False):
+        """
+        :param max_velocity: m/s unit
+        :param condition:
+        """
+        super().__init__(one_shot=one_shot, condition=condition)
+        self.max_velocity = max_velocity
+
+    def _do(self, actor):
+        vel_limit_msg = VelocityLimit()
+        vel_limit_msg.max_velocity = float(self.max_velocity)
+        vel_limit_msg.use_constraints = False
+        vel_limit_msg.sender = ""
+        actor.client_node.ego_max_speed_publisher.publish(vel_limit_msg)
 
