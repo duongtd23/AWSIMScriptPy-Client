@@ -171,6 +171,10 @@ class ClientNode(Node):
             GroundtruthKinematic,
             '/simulation/gt_srv/kinematic'
         )
+        self.groundtruth_size_client = self.create_client(
+            GroundtruthSize,
+            '/simulation/gt_srv/size'
+        )
         # to clear route
         self.clear_route_client = self.create_client(
             ClearRoute,
@@ -397,6 +401,16 @@ class ClientNode(Node):
         # Create a request
         req = GroundtruthKinematic.Request()
         future = self.groundtruth_kinematic_client.call_async(req)
+        rclpy.spin_until_future_complete(self, future)
+        return future.result()
+
+    def query_groundtruth_size(self):
+        while not self.groundtruth_size_client.wait_for_service(timeout_sec=5.0):
+            print('[WARNING] Ground truth kinematic ROS service not available, waiting...')
+
+        # Create a request
+        req = GroundtruthSize.Request()
+        future = self.groundtruth_size_client.call_async(req)
         rclpy.spin_until_future_complete(self, future)
         return future.result()
 
