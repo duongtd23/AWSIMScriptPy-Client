@@ -19,9 +19,7 @@ def make_swerve_scenario(network,
     waypoints = [npc_init_pos, wp1]
 
     angle = np.asin(swerve_vy / npc_speed)
-    print(f"angle: {angle}")
     diagonal = npc_speed * swerve_ny / swerve_vy  # ny / sin(angle)
-    print(f"diagonal: {diagonal}")
     direction = (source_lane.way_points[_id+1] - wp1)[:2]
     direction_normalized = direction/np.linalg.norm(direction)
     wp1_2D = wp1[:2]
@@ -37,8 +35,6 @@ def make_swerve_scenario(network,
     waypoints.append(np.append(wp4, wp1[2]))
 
     print(waypoints)
-
-    # TODO: parse next lane
 
     npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))
     npc1.add_action(FollowWaypoints(waypoints=[utils.array_to_dict_pos(p) for p in waypoints],
