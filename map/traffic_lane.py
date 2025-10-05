@@ -1,7 +1,7 @@
 import json
 from enum import Enum
 from typing import Optional, Tuple
-import math
+import numpy as np
 
 import utils
 
@@ -40,6 +40,21 @@ class TrafficLane:
         return [(x,y) for (x,y,_) in self.way_points]
     
     def __str__(self):
-        next_ids = [entry.id for entry in self.next_lanes]
-        prev_ids = [entry.id for entry in self.prev_lanes]
+        next_ids = [entry for entry in self.next_lanes]
+        prev_ids = [entry for entry in self.prev_lanes]
         return f'Lane #{self.id}, next: {next_ids}, prev: {prev_ids}'
+
+    def project_point_onto_lane(self, point2D):
+        """
+        :param point2D: np array
+        :return:
+        """
+        min_dis = float("inf")
+        result = None
+        for i in range(len(self.way_points) - 1):
+            projection, projection_inside_segment = utils.project_point_to_segment_2d(point2D, self.way_points[i], self.way_points[i+1])
+            dis = np.linalg.norm(projection - point2D)
+            if projection_inside_segment and dis < min_dis:
+                min_dis = dis
+                result = projection
+        return result
