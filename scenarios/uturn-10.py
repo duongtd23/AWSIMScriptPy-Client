@@ -1,0 +1,28 @@
+from core.scenario_manager import *
+from scenarios.uturn import make_uturn_scenario
+
+if __name__ == '__main__':
+    scenario_manager = ScenarioManager()
+    scenarios = []
+    ves = [30, 35, 40]
+    dx0s = [26, 30, 36]
+    ego_init_laneoffsets = [LaneOffset('511', 30),
+                            LaneOffset('511', 17),
+                            LaneOffset('281', 4)]
+    ego_goal_laneoffsets = [LaneOffset('513', 20),
+                            LaneOffset('513', 20),
+                            LaneOffset('123', 18)]
+    for (ve, dx0, ego_init_laneoffset, ego_goal_laneoffset) in (
+            zip(ves, dx0s, ego_init_laneoffsets, ego_goal_laneoffsets)):
+        scenarios.append(
+            make_uturn_scenario(scenario_manager.client_node, scenario_manager.network,
+                                ego_init_laneoffset=ego_init_laneoffset,
+                                ego_goal_laneoffset=ego_goal_laneoffset,
+                                npc_init_laneoffset=LaneOffset('521', 35),
+                                uturn_start_laneoffset=LaneOffset('521', 43),
+                                uturn_next_lane='511',
+                                ego_speed=ve/3.6,
+                                npc_speed=10/3.6,
+                                dx0=dx0
+                                ))
+    scenario_manager.run(scenarios[2:])

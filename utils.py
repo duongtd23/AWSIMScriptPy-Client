@@ -99,14 +99,12 @@ def project_point_to_segment_2d(P, A, B):
     Project point P(px, py) on segment AB.
     :return: {projection, projection_inside_segment}
     projection_inside_segment is false if the projection point falls outside the segment.
-    When it falls outside, return either A or B
     """
     line = np.array(B - A)
     if np.allclose(line, 0):
         return A, True
     t = np.dot(P - A, line) / np.dot(line, line)
     projection_inside_segment = t>=0 and t<=1
-    t = max(0, min(1, t))
     proj = A + t * line
     return proj, projection_inside_segment
 
@@ -116,14 +114,14 @@ def get_point_side(A, B, P):
     :param A: starting point (np array)
     :param B: ending point
     :param P: query point.
-    :return: -1 if P is to the left, 1 if P is to the right, 0 if P is collinear.
+    :return: 1 if P is to the left, -1 if P is to the right, 0 if P is collinear.
     """
     AB = B - A
     AP = P - A
     cross_product = AB[0] * AP[1] - AB[1] * AP[0]
     if cross_product > 1e-6:
-        return -1  # Left
+        return 1  # Left
     elif cross_product < -1e-6:
-        return 1  # Right
+        return -1  # Right
     else:
         return 0  # Collinear

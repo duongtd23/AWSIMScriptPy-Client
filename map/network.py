@@ -1,6 +1,7 @@
 from typing import List
 from map.traffic_lane import *
 import numpy as np
+import math
 
 class LaneOffset:
     def __init__(self, lane_str, offset: float=0.0):
@@ -42,3 +43,14 @@ class Network:
             remaining_dis = remaining_dis - np.linalg.norm(segment)
 
         raise Exception(f"Offset {lane_offset.offset} exceeds length of lane {lane_offset.lane_str}")
+
+    def parse_lane(self, lane):
+        """
+        :param lane: can be string in full name or shortened form
+        :return:
+        """
+        if isinstance(lane, TrafficLane):
+            return lane
+        if isinstance(lane, str):
+            return next((l for l in self.traffic_lanes if l.has_id(lane)), None)
+        raise Exception(f"Cannot interpret lane {lane}.")

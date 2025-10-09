@@ -12,7 +12,7 @@ class SpawnEgo(Action):
         self.position = position
         self.orientation = orientation
 
-    def _do(self, actor):
+    def _do(self, actor, client_node):
         """
         Spawn the ego vehicle and request (re-)localization
         :param position:
@@ -27,22 +27,22 @@ class SpawnEgo(Action):
 
         # publish a pose message
         msg = PoseWithCovarianceStamped()
-        msg.header.stamp = actor.client_node.get_clock().now().to_msg()
+        msg.header.stamp = client_node.get_clock().now().to_msg()
         msg.header.frame_id = 'map'
         msg.pose.pose = ros_pose
         msg.pose.covariance = cov
 
-        actor.client_node.ego_pose_publisher.publish(msg)
+        client_node.ego_pose_publisher.publish(msg)
         time.sleep(1)
 
-        ok = actor.client_node.re_localization(ros_pose, cov)
+        ok = client_node.re_localization(ros_pose, cov)
         if ok:
-            actor.client_node.get_logger().info("Spawned ego and re-localized successfully.")
+            client_node.get_logger().info("Spawned ego and re-localized successfully.")
             # re-localization succeeded
             # self.ads_internal_status = AdsInternalStatus.GOAL_SET
             # self.loop()
         else:
-            actor.client_node.get_logger().error("Failed to localize ego.")
+            client_node.get_logger().error("Failed to localize ego.")
 
 class SetGoalPose(Action):
     def __init__(self, position, orientation, condition=None):
@@ -50,7 +50,7 @@ class SetGoalPose(Action):
         self.position = position
         self.orientation = orientation
 
-    def _do(self, actor):
+    def _do(self, actor, client_node):
         """
         Set goal for autonomous driving
         :param position:
@@ -59,14 +59,14 @@ class SetGoalPose(Action):
         """
         time.sleep(1)
         ros_goal = utils.obj_to_ros_pose(self.position, self.orientation)
-        actor.client_node.set_goal(ros_goal)
+        client_node.set_goal(ros_goal)
 
 class ActivateAutonomousMode(Action):
     def __init__(self, condition=None):
         super().__init__(one_shot=True, condition=condition)
 
-    def _do(self, actor):
-        actor.client_node.send_engage_cmd()
+    def _do(self, actor, client_node):
+        client_node.send_engage_cmd()
 
 class SetVelocityLimit(Action):
     def __init__(self, max_velocity, condition=None, one_shot=False):
@@ -77,10 +77,10 @@ class SetVelocityLimit(Action):
         super().__init__(one_shot=one_shot, condition=condition)
         self.max_velocity = max_velocity
 
-    def _do(self, actor):
+    def _do(self, actor, client_node):
         vel_limit_msg = VelocityLimit()
         vel_limit_msg.max_velocity = float(self.max_velocity)
         vel_limit_msg.use_constraints = False
         vel_limit_msg.sender = ""
-        actor.client_node.ego_max_speed_publisher.publish(vel_limit_msg)
+        client_node.ego_max_speed_publisher.publish(vel_limit_msg)
 

@@ -8,12 +8,12 @@ class Action(ABC):
     def should_trigger(self, actor, global_state):
         return self.condition is None or self.condition(actor, global_state)
 
-    def execute(self, actor, global_state):
+    def execute(self, actor, global_state, client_node):
         if self.should_trigger(actor, global_state):
-            self._do(actor)
+            self._do(actor, client_node)
             return True
         return False
 
     @abstractmethod
-    def _do(self, actor):
+    def _do(self, actor, client_node):
         pass

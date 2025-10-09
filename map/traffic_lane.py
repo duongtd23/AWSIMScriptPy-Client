@@ -15,10 +15,11 @@ class TurnDirection(Enum):
 # Represent a traffic lane
 class TrafficLane:
     def __init__(self, id: str, turn_direction:TurnDirection, speed_limit:float,
-                 way_points, next_lanes: Tuple[str], prev_lanes: Tuple[str]):
+                 width, way_points, next_lanes: Tuple[str], prev_lanes: Tuple[str]):
         self.id = id
         self.turn_direction = turn_direction
         self.speed_limit = speed_limit
+        self.width = width
 
         self.way_points = way_points
         self.next_lanes = next_lanes
@@ -31,30 +32,40 @@ class TrafficLane:
     def from_dict(cls, dict_obj):
         way_points = [utils.dict_to_point_obj(p) for p in dict_obj['waypoints']]
         return cls(dict_obj['id'], dict_obj['turn_direction'], dict_obj['speed_limit'],
-                   way_points, dict_obj['next_lanes'], dict_obj['prev_lanes'])
+                   dict_obj['width'], way_points, dict_obj['next_lanes'], dict_obj['prev_lanes'])
 
     def is_intersection_lane(self):
         return self.turn_direction != TurnDirection.UNDEFINED
     
     def get_2D_waypoints(self):
         return [(x,y) for (x,y,_) in self.way_points]
+
+    def has_id(self, _id):
+        return self.id == _id or self.id == "TrafficLane." + _id
     
     def __str__(self):
         next_ids = [entry for entry in self.next_lanes]
         prev_ids = [entry for entry in self.prev_lanes]
         return f'Lane #{self.id}, next: {next_ids}, prev: {prev_ids}'
 
-    def project_point_onto_lane(self, point2D):
+    def project_point2D_onto_lane(self, point2D):
         """
         :param point2D: np array
-        :return:
+        :return: pair {projection, flag}, where flag is true if the projection falls inside the lane.
         """
         min_dis = float("inf")
         result = None
         for i in range(len(self.way_points) - 1):
-            projection, projection_inside_segment = utils.project_point_to_segment_2d(point2D, self.way_points[i], self.way_points[i+1])
+            projection, projection_inside_segment = utils.project_point_to_segment_2d(point2D,
+                                                                                      self.way_points[i][:2],
+                                                                                      self.way_points[i+1][:2])
             dis = np.linalg.norm(projection - point2D)
             if projection_inside_segment and dis < min_dis:
                 min_dis = dis
                 result = projection
-        return result
+        if result is not None:
+            return result, True
+
+        if np.linalg.norm(point2D - self.way_points[0]) < np.linalg.norm(point2D - self.way_points[-1]):
+            return utils.project_point_to_segment_2d(point2D, self.way_points[0][:2], self.way_points[1][:2])
+        return utils.project_point_to_segment_2d(point2D, self.way_points[-1][:2], self.way_points[-2][:2])

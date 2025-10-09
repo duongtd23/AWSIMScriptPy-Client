@@ -16,7 +16,7 @@ class SpawnNPCVehicle(Action):
         self.position = position
         self.orientation = orientation
 
-    def _do(self, actor:NPCVehicle):
+    def _do(self, actor:NPCVehicle, client_node):
         my_dict = {
             "name": actor.actor_id,
             "body_style": actor.body_style.value,
@@ -26,15 +26,15 @@ class SpawnNPCVehicle(Action):
 
         msg = std_msgs.msg.String()
         msg.data = json.dumps(my_dict)
-        actor.client_node.dynamic_npc_spawning_publisher.publish(msg)
+        client_node.dynamic_npc_spawning_publisher.publish(msg)
 
         # do a service request to confirm the spawning
         req = DynamicControl.Request()
         req.json_request = msg.data
         retry = 0
         while retry < 10:
-            future = actor.client_node.dynamic_npc_spawning_client.call_async(req)
-            rclpy.spin_until_future_complete(actor.client_node, future)
+            future = client_node.dynamic_npc_spawning_client.call_async(req)
+            rclpy.spin_until_future_complete(client_node, future)
             response = future.result()
             if response.status.success:
                 print(f"Spawned NPC vehicle {actor.actor_id}")
@@ -44,7 +44,7 @@ class SpawnNPCVehicle(Action):
             retry += 1
 
         if retry >= 10:
-            actor.client_node.get_logger().error(f"Failed to spawn NPC vehicle, "
+            client_node.get_logger().error(f"Failed to spawn NPC vehicle, "
                                                  f"error message: {response.status.message}")
 
 class FollowLane(Action):
@@ -57,7 +57,7 @@ class FollowLane(Action):
         self.acceleration = acceleration
         self.deceleration = deceleration
 
-    def _do(self, actor:NPCVehicle):
+    def _do(self, actor:NPCVehicle, client_node):
         is_speed_defined = self.target_speed is not None
         is_acceleration_defined = self.acceleration is not None
         is_deceleration_defined = self.deceleration is not None
@@ -72,15 +72,15 @@ class FollowLane(Action):
         }
         msg = std_msgs.msg.String()
         msg.data = json.dumps(my_dict)
-        actor.client_node.follow_lane_publisher.publish(msg)
+        client_node.follow_lane_publisher.publish(msg)
 
         # do a service request to confirm the command was sent and processed properly
         retry = 0
         req = DynamicControl.Request()
         req.json_request = msg.data
         while retry < 10:
-            future = actor.client_node.follow_lane_client.call_async(req)
-            rclpy.spin_until_future_complete(actor.client_node, future)
+            future = client_node.follow_lane_client.call_async(req)
+            rclpy.spin_until_future_complete(client_node, future)
             response = future.result()
             if response.status.success:
                 print(f"Sent follow lane command to {actor.actor_id} successfully.")
@@ -90,7 +90,7 @@ class FollowLane(Action):
             retry += 1
 
         if retry == 10:
-            actor.client_node.get_logger().error(f"[ERROR] AWSIM failed to "
+            client_node.get_logger().error(f"[ERROR] AWSIM failed to "
                                                  f"process follow lane action, "
                                                  f"error message: {response.status.message}.")
 
@@ -106,7 +106,7 @@ class FollowWaypoints(Action):
         self.acceleration = acceleration
         self.deceleration = deceleration
 
-    def _do(self, actor:NPCVehicle):
+    def _do(self, actor:NPCVehicle, client_node):
         is_speed_defined = self.target_speed is not None
         is_acceleration_defined = self.acceleration is not None
         is_deceleration_defined = self.deceleration is not None
@@ -123,15 +123,15 @@ class FollowWaypoints(Action):
         }
         msg = std_msgs.msg.String()
         msg.data = json.dumps(my_dict)
-        actor.client_node.follow_waypoints_publisher.publish(msg)
+        client_node.follow_waypoints_publisher.publish(msg)
 
         # do a service request to confirm the command was sent and processed properly
         retry = 0
         req = DynamicControl.Request()
         req.json_request = msg.data
         while retry < 10:
-            future = actor.client_node.follow_waypoints_client.call_async(req)
-            rclpy.spin_until_future_complete(actor.client_node, future)
+            future = client_node.follow_waypoints_client.call_async(req)
+            rclpy.spin_until_future_complete(client_node, future)
             response = future.result()
             if response.status.success:
                 print(f"Sent follow waypoints command to {actor.actor_id} successfully.")
@@ -140,5 +140,5 @@ class FollowWaypoints(Action):
             retry += 1
 
         if retry == 10:
-            actor.client_node.get_logger().error(f"[ERROR] AWSIM failed to process follow waypoints action, "
+            client_node.get_logger().error(f"[ERROR] AWSIM failed to process follow waypoints action, "
                   f"error message: {response.status.message}.")

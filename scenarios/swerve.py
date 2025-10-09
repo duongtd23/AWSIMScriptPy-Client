@@ -3,27 +3,28 @@ import numpy as np
 from core.scenario_manager import *
 from core.trigger_condition import *
 
-def make_swerve_scenario(network,
+def make_swerve_scenario(node, network,
                          ego_init_laneoffset,
                          ego_goal_laneoffset,
                          npc_init_laneoffset,
                          swerve_start_laneoffset,
-                         ego_speed=20/3.6,
-                         npc_speed=10/3.6,
+                         ego_speed=30/3.6,
+                         npc_speed=15/3.6,
                          swerve_vy = 1.2,
                          swerve_ny=1.8,
                          swerve_dis=2.0,
                          dx0=40,
                          npc_root_to_frontcenter=2.01+1.43,
                          swerve_right=True,
-                         acceleration=7,
-                         delay_time=0.01):
+                         acceleration=8,
+                         body_style=BodyStyle.HATCHBACK,
+                         delay_time=0.05):
     _, _, init_pos, init_orient = network.parse_lane_offset(ego_init_laneoffset)
     _, _, goal_pos, goal_orient = network.parse_lane_offset(ego_goal_laneoffset)
 
     # ego specification
-    ego = EgoVehicle(node)
-    npc1 = NPCVehicle("npc1", node, BodyStyle.HATCHBACK)
+    ego = EgoVehicle()
+    npc1 = NPCVehicle("npc1", body_style)
     ego.add_action(SpawnEgo(position=init_pos, orientation=init_orient))
     ego.add_action(SetGoalPose(position=goal_pos, orientation=goal_orient))
     ego.add_action(ActivateAutonomousMode(condition=autonomous_mode_ready()))
@@ -65,24 +66,18 @@ def make_swerve_scenario(network,
     npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))
     npc1.add_action(FollowWaypoints(waypoints=[utils.array_to_dict_pos(p) for p in waypoints],
                                     target_speed=npc_speed,
-                                    acceleration=8,
+                                    acceleration=acceleration,
                                     condition=longitudinal_distance_to_ego_less_than(dis_threshold)))
 
-    return ScenarioManager(node, network,[ego, npc1])
+    return Scenario(node, network, [ego, npc1])
 
 if __name__ == '__main__':
-    rclpy.init()
-    node = ClientNode()
-    network = node.send_map_network_req()
-    print(network)
+    scenario_manager = ScenarioManager()
 
-    scenario = make_swerve_scenario(network,
+    scenario = make_swerve_scenario(scenario_manager.client_node, scenario_manager.network,
                                     ego_init_laneoffset=LaneOffset('355', 20),
                                     ego_goal_laneoffset=LaneOffset('214', 21),
                                     npc_init_laneoffset=LaneOffset('205', 40),
                                     swerve_start_laneoffset=LaneOffset('205', 48)
                                     )
-    scenario.run()
-
-    node.destroy_node()
-    rclpy.shutdown()
+    scenario_manager.run([scenario])

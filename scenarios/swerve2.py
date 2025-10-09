@@ -41,7 +41,7 @@ def make_swerve_scenario(network,
                                     target_speed=npc_speed,
                                     acceleration=7))
 
-    return ScenarioManager(node, network,[npc1])
+    return Scenario(node, network, [npc1])
 
 if __name__ == '__main__':
     rclpy.init()

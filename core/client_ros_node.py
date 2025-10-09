@@ -418,6 +418,9 @@ class ClientNode(Node):
         """
         :return: instance of network.Network
         """
+        while not self.map_network_client.wait_for_service(timeout_sec=2.0):
+            print('[WARNING] Map network ROS service not available, waiting...')
+
         req = DynamicControl.Request()
         req.json_request = ""
         self.get_logger().info(f"Sending Map Network Request")

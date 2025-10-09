@@ -3,24 +3,24 @@ import numpy as np
 from core.scenario_manager import *
 from core.trigger_condition import *
 
-def make_uturn_scenario(network,
+def  make_uturn_scenario(node, network,
                          ego_init_laneoffset,
                          ego_goal_laneoffset,
                          npc_init_laneoffset,
                          uturn_start_laneoffset,
                          uturn_next_lane,
-                         ego_speed=20/3.6,
-                         npc_speed=10/3.6,
-                         dx0=40,
+                         ego_speed=30/3.6,
+                         npc_speed=15/3.6,
+                         dx0=30,
                          npc_root_to_frontcenter=2.01+1.43,
-                         acceleration=7,
-                         delay_time=0.01):
+                         acceleration=8,
+                         delay_time=0.05):
     _, _, init_pos, init_orient = network.parse_lane_offset(ego_init_laneoffset)
     _, _, goal_pos, goal_orient = network.parse_lane_offset(ego_goal_laneoffset)
 
     # ego specification
-    ego = EgoVehicle(node)
-    npc1 = NPCVehicle("npc1", node, BodyStyle.HATCHBACK)
+    ego = EgoVehicle()
+    npc1 = NPCVehicle("npc1", BodyStyle.HATCHBACK)
     ego.add_action(SpawnEgo(position=init_pos, orientation=init_orient))
     ego.add_action(SetGoalPose(position=goal_pos, orientation=goal_orient))
     ego.add_action(ActivateAutonomousMode(condition=autonomous_mode_ready()))
@@ -30,21 +30,18 @@ def make_uturn_scenario(network,
     _id, source_lane, wp1, _ = network.parse_lane_offset(uturn_start_laneoffset)
 
     # uturn specification
-    if isinstance(uturn_next_lane, str):
-        next_lane = next((l for l in network.traffic_lanes if l.id == uturn_next_lane), None)
-    elif isinstance(uturn_next_lane, TrafficLane):
-        next_lane = uturn_next_lane
-
+    next_lane = network.parse_lane(uturn_next_lane)
     # 1st step: compute the waypoints
     waypoints = [npc_init_pos, wp1]
     direction = (source_lane.way_points[_id + 1] - wp1)[:2]
     direction_normalized = direction / np.linalg.norm(direction)
     uturn_backwheel_pos = -npc_root_to_frontcenter*direction_normalized + wp1[:2]
-    turning_center = (next_lane.project_point_onto_lane(uturn_backwheel_pos) + uturn_backwheel_pos)/2
+    proj,_ = next_lane.project_point2D_onto_lane(uturn_backwheel_pos)
+    turning_center = (proj + uturn_backwheel_pos)/2
 
     turning_side = utils.get_point_side(uturn_backwheel_pos, wp1[:2], turning_center)
-    for i in range(1, 5):
-        wp = utils.rotate_point(wp1[:2], turning_center, turning_side*i*np.pi/4)
+    for i in range(1, 4):
+        wp = utils.rotate_point(wp1[:2], turning_center, turning_side*i*np.pi/3)
         waypoints.append(np.append(wp, wp1[2]))
 
     # 2nd step: calculate distance to trigger npc movement
@@ -61,25 +58,18 @@ def make_uturn_scenario(network,
     npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))
     npc1.add_action(FollowWaypoints(waypoints=[utils.array_to_dict_pos(p) for p in waypoints],
                                     target_speed=npc_speed,
-                                    acceleration=8,
+                                    acceleration=acceleration,
                                     condition=longitudinal_distance_to_ego_less_than(dis_threshold)))
 
-    return ScenarioManager(node, network,[ego, npc1])
+    return Scenario(node, network, [ego, npc1])
 
 if __name__ == '__main__':
-    rclpy.init()
-    node = ClientNode()
-    network = node.send_map_network_req()
-    print(network)
-
-    scenario = make_uturn_scenario(network,
-                                    ego_init_laneoffset=LaneOffset('511', 40),
+    scenario_manager = ScenarioManager()
+    scenario =  make_uturn_scenario(scenario_manager.client_node, scenario_manager.network,
+                                    ego_init_laneoffset=LaneOffset('511', 25),
                                     ego_goal_laneoffset=LaneOffset('513', 15),
                                     npc_init_laneoffset=LaneOffset('521', 35),
-                                    uturn_start_laneoffset=LaneOffset('511', 43),
-                                    uturn_next_lane='513'
+                                    uturn_start_laneoffset=LaneOffset('521', 43),
+                                    uturn_next_lane='511'
                                     )
-    scenario.run()
-
-    node.destroy_node()
-    rclpy.shutdown()
+    scenario_manager.run([scenario])
