@@ -1,17 +1,14 @@
-import numpy as np
-
 from core.scenario_manager import *
-from core.trigger_condition import *
 
-def make_swerve_scenario(network,
-                         npc_init_laneoffset,
-                         swerve_start_laneoffset,
-                         npc_speed=10/3.6,
-                         swerve_vy = 1.2,
-                         swerve_ny=1.8,
-                         swerve_dis=2.0,
-                         swerve_right=True):
-    npc1 = NPCVehicle("npc1", node, BodyStyle.HATCHBACK)
+def make_scenario(network,
+                 npc_init_laneoffset,
+                 swerve_start_laneoffset,
+                 npc_speed,
+                 swerve_vy,
+                 swerve_ny=1.8,
+                 swerve_dis=2.0,
+                 swerve_right=True):
+    npc1 = NPCVehicle("npc1", BodyStyle.HATCHBACK)
 
     _, _, npc_init_pos, npc_init_orient = network.parse_lane_offset(npc_init_laneoffset)
     _id, source_lane, wp1, _ = network.parse_lane_offset(swerve_start_laneoffset)
@@ -41,19 +38,15 @@ def make_swerve_scenario(network,
                                     target_speed=npc_speed,
                                     acceleration=7))
 
-    return Scenario(node, network, [npc1])
+    return Scenario(network, [npc1])
 
 if __name__ == '__main__':
-    rclpy.init()
-    node = ClientNode()
-    network = node.send_map_network_req()
-    print(network)
+    scenario_manager = ScenarioManager()
+    scenario = make_scenario(scenario_manager.network,
+                             npc_init_laneoffset=LaneOffset('205', 57),
+                             swerve_start_laneoffset=LaneOffset('205', 65),
+                             npc_speed=15/3.6,
+                             swerve_vy=1.4,
+                            )
+    scenario_manager.run([scenario])
 
-    scenario = make_swerve_scenario(network,
-                                    npc_init_laneoffset=LaneOffset('205', 50),
-                                    swerve_start_laneoffset=LaneOffset('205', 58)
-                                    )
-    scenario.run()
-
-    node.destroy_node()
-    rclpy.shutdown()

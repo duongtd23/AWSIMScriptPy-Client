@@ -12,8 +12,8 @@ def longitudinal_distance_to_ego_less_than(threshold):
 
         npc = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
         if not npc:
-            print(global_state['actor-kinematics'])
-            print(f'[ERROR] NPC {actor.actor_id} not found')
+            # print(global_state['actor-kinematics'])
+            # print(f'[ERROR] NPC {actor.actor_id} not found')
             return False
         npc_pos = np.array(npc['pose']['position'])
 
@@ -24,6 +24,25 @@ def longitudinal_distance_to_ego_less_than(threshold):
         npc_root_to_front = global_state["actor-sizes"][actor.actor_id]["size"][0]/2 + \
                             global_state["actor-sizes"][actor.actor_id]["center"][0]
         return dis - ego_root_to_front - npc_root_to_front <= threshold
+
+    return _cond
+
+def distance_to_ego_less_than(threshold):
+    def _cond(actor, global_state):
+        if not global_state['actor-kinematics'] or not global_state['actor-sizes']:
+            return False
+        ego = global_state['actor-kinematics']['ego']
+        ego_pos = np.array(ego['pose']['position'])
+
+        npc = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
+        if not npc:
+            print(global_state['actor-kinematics'])
+            print(f'[ERROR] NPC {actor.actor_id} not found')
+            return False
+
+        npc_pos = np.array(npc['pose']['position'])
+        dis = np.linalg.norm(ego_pos - npc_pos)
+        return dis <= threshold
 
     return _cond
 

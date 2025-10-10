@@ -10,7 +10,7 @@ if __name__ == '__main__':
     dx0s = [38, 33, 29]
     for (vy,dx0) in zip(vys, dx0s):
         scenarios.append(
-            make_swerve_scenario(scenario_manager.client_node, scenario_manager.network,
+            make_swerve_scenario(scenario_manager.network,
                                  ego_init_laneoffset=LaneOffset('268'),
                                  ego_goal_laneoffset=LaneOffset('214', 26),
                                  npc_init_laneoffset=LaneOffset('205', 58),
@@ -20,4 +20,4 @@ if __name__ == '__main__':
                                  swerve_vy=vy,
                                  dx0=dx0
                                 ))
-    scenario_manager.run(scenarios[1:])
+    scenario_manager.run(scenarios[:1])

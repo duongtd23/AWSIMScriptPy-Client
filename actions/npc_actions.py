@@ -124,21 +124,22 @@ class FollowWaypoints(Action):
         msg = std_msgs.msg.String()
         msg.data = json.dumps(my_dict)
         client_node.follow_waypoints_publisher.publish(msg)
+        print(f"Sent follow waypoints command to {actor.actor_id} successfully.")
 
         # do a service request to confirm the command was sent and processed properly
-        retry = 0
-        req = DynamicControl.Request()
-        req.json_request = msg.data
-        while retry < 10:
-            future = client_node.follow_waypoints_client.call_async(req)
-            rclpy.spin_until_future_complete(client_node, future)
-            response = future.result()
-            if response.status.success:
-                print(f"Sent follow waypoints command to {actor.actor_id} successfully.")
-                break
-            time.sleep(0.5)
-            retry += 1
-
-        if retry == 10:
-            client_node.get_logger().error(f"[ERROR] AWSIM failed to process follow waypoints action, "
-                  f"error message: {response.status.message}.")
+        # retry = 0
+        # req = DynamicControl.Request()
+        # req.json_request = msg.data
+        # while retry < 10:
+        #     future = client_node.follow_waypoints_client.call_async(req)
+        #     rclpy.spin_until_future_complete(client_node, future)
+        #     response = future.result()
+        #     if response.status.success:
+        #         print(f"Sent follow waypoints command to {actor.actor_id} successfully.")
+        #         break
+        #     time.sleep(0.5)
+        #     retry += 1
+        #
+        # if retry == 10:
+        #     client_node.get_logger().error(f"[ERROR] AWSIM failed to process follow waypoints action, "
+        #           f"error message: {response.status.message}.")

@@ -18,10 +18,14 @@ class Actor:
         self.actions.append(action)
 
     def tick(self, global_state, client_node):
-        for action in self.actions:
-            if action.execute(self, global_state, client_node):
-                if action.one_shot:
-                    self.actions.remove(action)
+        ids_to_remove = []
+        for (i,action) in enumerate(self.actions):
+            completed = action.execute(self, global_state, client_node)
+            if completed and action.one_shot:
+                ids_to_remove.insert(0, i)
+
+        [self.actions.pop(i) for i in ids_to_remove]
+
 
 class VehicleActor(Actor):
     def __init__(self, actor_id, size=(5,2,1.4), center=(0.0,0.0,0.0)):

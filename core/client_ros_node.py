@@ -8,10 +8,12 @@ import std_msgs.msg
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped, PoseWithCovariance
 from aw_monitor.srv import *
 from autoware_adapi_v1_msgs.srv import InitializeLocalization, ChangeOperationMode, ClearRoute
+from autoware_adapi_v1_msgs.msg import RouteState
 from autoware_vehicle_msgs.msg import Engage
 import utils
 from tier4_planning_msgs.msg import VelocityLimit
 from aw_monitor.srv import *
+import aw_monitor.msg
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 

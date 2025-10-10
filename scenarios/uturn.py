@@ -61,7 +61,7 @@ def  make_uturn_scenario(node, network,
                                     acceleration=acceleration,
                                     condition=longitudinal_distance_to_ego_less_than(dis_threshold)))
 
-    return Scenario(node, network, [ego, npc1])
+    return Scenario(network, [ego, npc1])
 
 if __name__ == '__main__':
     scenario_manager = ScenarioManager()

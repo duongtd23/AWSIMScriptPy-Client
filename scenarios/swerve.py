@@ -3,7 +3,7 @@ import numpy as np
 from core.scenario_manager import *
 from core.trigger_condition import *
 
-def make_swerve_scenario(node, network,
+def make_swerve_scenario(network,
                          ego_init_laneoffset,
                          ego_goal_laneoffset,
                          npc_init_laneoffset,
@@ -18,7 +18,7 @@ def make_swerve_scenario(node, network,
                          swerve_right=True,
                          acceleration=8,
                          body_style=BodyStyle.HATCHBACK,
-                         delay_time=0.05):
+                         delay_time=0.04):
     _, _, init_pos, init_orient = network.parse_lane_offset(ego_init_laneoffset)
     _, _, goal_pos, goal_orient = network.parse_lane_offset(ego_goal_laneoffset)
 
@@ -69,12 +69,12 @@ def make_swerve_scenario(node, network,
                                     acceleration=acceleration,
                                     condition=longitudinal_distance_to_ego_less_than(dis_threshold)))
 
-    return Scenario(node, network, [ego, npc1])
+    return Scenario(network, [ego, npc1])
 
 if __name__ == '__main__':
     scenario_manager = ScenarioManager()
 
-    scenario = make_swerve_scenario(scenario_manager.client_node, scenario_manager.network,
+    scenario = make_swerve_scenario(scenario_manager.network,
                                     ego_init_laneoffset=LaneOffset('355', 20),
                                     ego_goal_laneoffset=LaneOffset('214', 21),
                                     npc_init_laneoffset=LaneOffset('205', 40),

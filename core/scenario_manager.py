@@ -3,16 +3,18 @@ from core.action import *
 from core.actor import *
 from actions.ego_actions import *
 from actions.npc_actions import *
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
 
 class Scenario:
-    def __init__(self, client_node:ClientNode, network:Network, actors):
-        self.client_node = client_node
+    def __init__(self, network: Network, actors, client_node: ClientNode=None):
         self.network = network
-        self.logger = client_node.get_logger()
+        self.client_node = client_node
+        if self.client_node is not None:
+            self.logger = client_node.get_logger()
 
         # validate actor ids
         if not any(a.actor_id=="ego" for a in actors):
-            self.logger.warn("No ego actor found.")
+            print("[WARN] No ego actor found.")
         for i in range(len(actors)):
             for j in range(i + 1, len(actors)):
                 if actors[i].actor_id == actors[j].actor_id:
@@ -24,22 +26,24 @@ class Scenario:
             "ads_internal_status": AdsInternalStatus.UNINITIALIZED.value,
             "ego_motion_state": MOTION_STATE_STOPPED,
         }
-        self.has_active_action = True
+        self.lock = False
+
+    def set_client(self, client_node):
+        self.client_node = client_node
+        self.logger = client_node.get_logger()
 
     def run(self):
         while self.running:
             self.update_global_state()
             for actor in self.actors:
-                # actor.update_state()
                 actor.tick(self.global_state, self.client_node)
 
-            if self.global_state["ads_internal_status"] == AdsInternalStatus.GOAL_ARRIVED.value:
-                print("Goal arrived. Scenario terminating...")
-                self.terminate()
+            if self.global_state["ads_internal_status"] == AdsInternalStatus.AUTONOMOUS_IN_PROGRESS.value:
+                self.running = False
+                self.subscribe_kinematics()
+                return
 
-            if not any(actor.actor_id != "ego" and actor.actions for actor in self.actors):
-                # print("No remain actions")
-                time.sleep(0.1)
+            time.sleep(0.2)
 
     def terminate(self):
         self.running = False
@@ -50,20 +54,63 @@ class Scenario:
         if ads_exec_state.is_autonomous_mode_available and \
                 ads_exec_state.routing_state == ROUTING_STATE_SET and \
                 self.global_state["ads_internal_status"] < AdsInternalStatus.AUTONOMOUS_MODE_READY.value:
-            # print(ads_exec_state)
-            self.logger.info("Autonomous operation mode is ready")
+            self.logger.info("Autonomous operation mode is ready.")
             self.global_state["ads_internal_status"] = AdsInternalStatus.AUTONOMOUS_MODE_READY.value
 
-        if ads_exec_state.routing_state == ROUTING_STATE_ARRIVED:
-            # motion_state = 1, routing_state = 3, operation_state = 2, is_autonomous_mode_available = True
-            self.logger.info("Arrived destination")
-            self.global_state["ads_internal_status"] = AdsInternalStatus.GOAL_ARRIVED.value
+        if ads_exec_state.motion_state == MOTION_STATE_MOVING and \
+            self.global_state["ads_internal_status"] == AdsInternalStatus.AUTONOMOUS_MODE_READY.value:
+            self.global_state["ads_internal_status"] = AdsInternalStatus.AUTONOMOUS_IN_PROGRESS.value
 
         kinematics_msg = self.client_node.query_groundtruth_kinematics()
         self.global_state["actor-kinematics"] = kinematic_msg_to_dict(kinematics_msg)
 
         gt_size_msg = self.client_node.query_groundtruth_size()
         self.global_state["actor-sizes"] = gt_size_msg_to_dict(gt_size_msg)
+
+    def subscribe_kinematics(self):
+        self.client_node.create_subscription(
+            aw_monitor.msg.GroundtruthKinematic,
+            '/simulation/gt/kinematic',
+            self.kinematics_callback,
+            QoSProfile(
+                reliability=ReliabilityPolicy.BEST_EFFORT,
+                history=HistoryPolicy.KEEP_LAST,
+                depth=10
+            )
+        )
+        self.client_node.create_subscription(
+            RouteState,
+            '/api/routing/state',
+            self.routing_state_callback,
+            QoSProfile(
+                reliability=ReliabilityPolicy.RELIABLE,
+                history=HistoryPolicy.KEEP_LAST,
+                depth=10,
+                durability=DurabilityPolicy.TRANSIENT_LOCAL
+            )
+        )
+        self.my_spin()
+
+    def kinematics_callback(self, msg):
+        if self.lock:
+            print(f"ignore kinematics {msg}")
+            return
+        self.lock = True
+        self.global_state["actor-kinematics"] = kinematic_msg_to_dict(msg)
+        for actor in self.actors:
+            actor.tick(self.global_state, self.client_node)
+        self.lock = False
+
+    def routing_state_callback(self, msg):
+        if msg.state == ROUTING_STATE_ARRIVED:
+            self.logger.info("Goal arrived")
+            self.global_state["ads_internal_status"] = AdsInternalStatus.GOAL_ARRIVED.value
+
+    def my_spin(self):
+        while self.global_state["ads_internal_status"] < AdsInternalStatus.GOAL_ARRIVED.value:
+            rclpy.spin_once(self.client_node)
+
+        self.logger.info("Scenario terminated")
 
 class ScenarioManager:
     def __init__(self, wait_writing_trace=False,):
@@ -72,23 +119,21 @@ class ScenarioManager:
         self.network = self.client_node.send_map_network_req()
         self.wait_writing_trace = wait_writing_trace
 
-    def reset(self):
+    def reset(self, init_new=False):
         self.client_node.destroy_node()
         rclpy.shutdown()
-        rclpy.init()
-        self.client_node = ClientNode()
+        if init_new:
+            rclpy.init()
+            self.client_node = ClientNode()
 
     def run(self, scenarios):
         while scenarios:
             current_scenario = scenarios.pop(0)
-            # current_scenario.client_node = self.client_node
-            # current_scenario.logger = current_scenario.client_node.get_logger()
-            print("\n Starting scenario")
+            current_scenario.set_client(self.client_node)
+            print("\nStarting scenario")
             current_scenario.run()
             self.scenario_finish()
-            # self.reset()
-
-        self.terminate()
+            self.reset(init_new=len(scenarios)>0)
 
     def scenario_finish(self):
         self.client_node.publish_finish_signal()
@@ -105,10 +150,6 @@ class ScenarioManager:
         self.client_node.clear_route()
         self.client_node.published_finish_signal = False
         time.sleep(15)
-
-    def terminate(self):
-        self.client_node.destroy_node()
-        rclpy.shutdown()
 
 def kinematic_msg_to_dict(msg):
     def veh_obj_to_dict(vehicle):

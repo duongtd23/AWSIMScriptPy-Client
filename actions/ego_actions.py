@@ -62,8 +62,8 @@ class SetGoalPose(Action):
         client_node.set_goal(ros_goal)
 
 class ActivateAutonomousMode(Action):
-    def __init__(self, condition=None):
-        super().__init__(one_shot=True, condition=condition)
+    def __init__(self, condition=None, callback=None):
+        super().__init__(one_shot=True, condition=condition, callback=callback)
 
     def _do(self, actor, client_node):
         client_node.send_engage_cmd()
