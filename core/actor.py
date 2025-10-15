@@ -54,12 +54,28 @@ class NPCVehicle(VehicleActor):
     def __init__(self, actor_id, body_style:BodyStyle, size=None, center=None):
         if size is None:
             match body_style:
-                case HATCHBACK:
+                case BodyStyle.TAXI:
+                    size = (4.64, 1.94, 1.64)
+                case BodyStyle.HATCHBACK:
                     size = (4.02,1.94,1.64)
-        if not center:
+                case BodyStyle.SMALL_CAR:
+                    size = (3.48, 1.82, 1.74)
+                case BodyStyle.VAN:
+                    size = (4.64, 1.94, 1.82)
+                case BodyStyle.TRUCK:
+                    size = (9.2, 3.08, 4.14)
+        if center is None:
             match body_style:
-                case HATCHBACK:
-                    center = (1.43,0.85,0.0)
+                case BodyStyle.TAXI:
+                    center = (1.12, 0.0, 0.85)
+                case BodyStyle.HATCHBACK:
+                    center = (1.43, 0.0, 0.85)
+                case BodyStyle.SMALL_CAR:
+                    center = (1.12, 0.0, 0.9)
+                case BodyStyle.VAN:
+                    center = (1.12, 0.0, 1.18)
+                case BodyStyle.TRUCK:
+                    center = (0.0, 0.0, 2.13)
 
         VehicleActor.__init__(self, actor_id, size)
         self.body_style = body_style

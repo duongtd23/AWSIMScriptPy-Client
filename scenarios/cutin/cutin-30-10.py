@@ -1,11 +1,18 @@
 from core.scenario_manager import *
-from scenarios.cutin import make_cutin_scenario
+from scenarios.cutin.base import make_cutin_scenario
 
 if __name__ == '__main__':
-    scenario_manager = ScenarioManager()
-    scenarios = []
+    # fixed params
+    ego_speed = 30/3.6
+    npc_speed = 10/3.6
+
+    # dynamic params
     vys = [1.2, 1.4, 1.6]
     dx0s = [12, 12, 11]
+
+    # scenarios
+    scenario_manager = ScenarioManager()
+    scenarios = []
     for (vy,dx0) in zip(vys, dx0s):
         scenarios.append(
             make_cutin_scenario(scenario_manager.client_node, scenario_manager.network,
@@ -14,12 +21,10 @@ if __name__ == '__main__':
                                 npc_init_laneoffset=LaneOffset('112', 80),
                                 cutin_start_laneoffset=LaneOffset('112', 84.5),
                                 cutin_next_lane='111',
-                                ego_speed=30 / 3.6,
-                                npc_speed=10 / 3.6,
+                                ego_speed=ego_speed,
+                                npc_speed=npc_speed,
                                 cutin_vy=vy,
                                 dx0=dx0,
-                                npc_root_to_frontcenter=2.01 + 1.43,
-                                acceleration=8,
-                                delay_time=0.05
+                                body_style=BodyStyle.SMALL_CAR,
                                 ))
     scenario_manager.run(scenarios)

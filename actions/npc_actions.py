@@ -45,7 +45,7 @@ class SpawnNPCVehicle(Action):
 
         if retry >= 10:
             client_node.get_logger().error(f"Failed to spawn NPC vehicle, "
-                                                 f"error message: {response.status.message}")
+                                           f"error message: {response.status.message}")
 
 class FollowLane(Action):
     def __init__(self, condition=None, target_speed=None, acceleration=None, deceleration=None):
@@ -91,8 +91,8 @@ class FollowLane(Action):
 
         if retry == 10:
             client_node.get_logger().error(f"[ERROR] AWSIM failed to "
-                                                 f"process follow lane action, "
-                                                 f"error message: {response.status.message}.")
+                                           f"process follow lane action, "
+                                           f"error message: {response.status.message}.")
 
 class FollowWaypoints(Action):
     def __init__(self, waypoints, condition=None,

@@ -32,11 +32,10 @@ def make_cutin_scenario(node, network,
                      npc_init_laneoffset,
                      cutin_start_laneoffset,
                      cutin_next_lane,
-                     ego_speed=30/3.6,
-                     npc_speed=10/3.6,
-                     cutin_vy = 1.2,
-                     dx0=18,
-                     npc_root_to_frontcenter=2.01+1.43,
+                     ego_speed,
+                     npc_speed,
+                     cutin_vy,
+                     dx0,
                      acceleration=8,
                      body_style=BodyStyle.HATCHBACK,
                      delay_time=0.05):
@@ -46,7 +45,6 @@ def make_cutin_scenario(node, network,
 
     # ego specification
     ego = EgoVehicle()
-    npc1 = NPCVehicle("npc1", body_style)
     ego.add_action(SpawnEgo(position=init_pos, orientation=init_orient))
     ego.add_action(SetGoalPose(position=goal_pos, orientation=goal_orient))
     ego.add_action(ActivateAutonomousMode(condition=autonomous_mode_ready()))
@@ -54,6 +52,9 @@ def make_cutin_scenario(node, network,
 
     _, _, npc_init_pos, npc_init_orient = network.parse_lane_offset(npc_init_laneoffset)
     _id, source_lane, wp1, _ = network.parse_lane_offset(cutin_start_laneoffset)
+
+    npc1 = NPCVehicle("npc1", body_style)
+    npc_root_to_frontcenter = npc1.size[0]/2 + npc1.center[0]
 
     # cutin specification
     next_lane = network.parse_lane(cutin_next_lane)

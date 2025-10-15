@@ -277,7 +277,7 @@ class ClientNode(Node):
                 self.get_logger().info("Re-Localization succeeded.")
                 return True
             else:
-                self.get_logger().error(f"Re-Localization failed, message: {response.status.message}")
+                self.get_logger().warn(f"Re-Localization failed, message: {response.status.message}")
                 self.get_logger().info("Retrying localization...")
                 time.sleep(1)
                 retry += 1
@@ -376,7 +376,7 @@ class ClientNode(Node):
             retry += 1
 
         if retry >= 10:
-            self.get_logger().error(f"Failed to remove NPC vehicle(s), error message: {response.status.message}")
+            self.get_logger().warn(f"Failed to remove NPC vehicle(s), error message: {response.status.message}")
 
     def publish_start_signal(self):
         # publish running signal
