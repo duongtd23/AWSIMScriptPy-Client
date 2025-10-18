@@ -1,9 +1,9 @@
 from core.scenario_manager import *
 from scenarios.uturn.base import make_uturn_scenario
 
-if __name__ == '__main__':
+def make_scenarios(network):
     # fixed params
-    vo = 10/3.6
+    vo = 10 / 3.6
 
     # dynamic params
     ves = [30, 35, 40]
@@ -16,19 +16,23 @@ if __name__ == '__main__':
                             LaneOffset('123', 18)]
 
     # scenarios
-    scenario_manager = ScenarioManager()
     scenarios = []
     for (ve, dx0, ego_init_laneoffset, ego_goal_laneoffset) in (
             zip(ves, dx0s, ego_init_laneoffsets, ego_goal_laneoffsets)):
         scenarios.append(
-            make_uturn_scenario(scenario_manager.network,
+            make_uturn_scenario(network,
                                 ego_init_laneoffset=ego_init_laneoffset,
                                 ego_goal_laneoffset=ego_goal_laneoffset,
                                 npc_init_laneoffset=LaneOffset('521', 38),
                                 uturn_start_laneoffset=LaneOffset('521', 43),
                                 uturn_next_lane='511',
-                                ego_speed=ve/3.6,
+                                ego_speed=ve / 3.6,
                                 npc_speed=vo,
                                 dx0=dx0
                                 ))
-    scenario_manager.run(scenarios)
+
+    return scenarios
+
+if __name__ == '__main__':
+    scenario_manager = ScenarioManager()
+    scenario_manager.run(make_scenarios(scenario_manager.network))

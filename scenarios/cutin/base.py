@@ -26,7 +26,7 @@ def longitudinal_distance_to_ego_less_than(threshold):
 
     return _cond
 
-def make_cutin_scenario(node, network,
+def make_cutin_scenario(network,
                      ego_init_laneoffset,
                      ego_goal_laneoffset,
                      npc_init_laneoffset,
@@ -98,7 +98,7 @@ def make_cutin_scenario(node, network,
 
 if __name__ == '__main__':
     scenario_manager = ScenarioManager()
-    scenario =  make_cutin_scenario(scenario_manager.client_node, scenario_manager.network,
+    scenario =  make_cutin_scenario(scenario_manager.network,
                                     ego_init_laneoffset=LaneOffset('111', 0),
                                     ego_goal_laneoffset=LaneOffset('111', 130),
                                     npc_init_laneoffset=LaneOffset('112', 88),

@@ -1,7 +1,7 @@
 from core.scenario_manager import *
 from scenarios.swerve.base import make_swerve_scenario
 
-if __name__ == '__main__':
+def make_scenarios(network):
     # fixed params
     ve = 30/3.6
     vo = 15/3.6
@@ -11,11 +11,10 @@ if __name__ == '__main__':
     dx0s = [33, 28, 24]
 
     # scenarios
-    scenario_manager = ScenarioManager()
     scenarios = []
     for (vy,dx0) in zip(vys, dx0s):
         scenarios.append(
-            make_swerve_scenario(scenario_manager.network,
+            make_swerve_scenario(network,
                                  ego_init_laneoffset=LaneOffset('355', 20),
                                  ego_goal_laneoffset=LaneOffset('214', 5),
                                  npc_init_laneoffset=LaneOffset('205', 64),
@@ -25,4 +24,8 @@ if __name__ == '__main__':
                                  swerve_vy=vy,
                                  dx0=dx0
                                 ))
-    scenario_manager.run(scenarios)
+    return scenarios
+
+if __name__ == '__main__':
+    scenario_manager = ScenarioManager()
+    scenario_manager.run(make_scenarios(scenario_manager.network))
