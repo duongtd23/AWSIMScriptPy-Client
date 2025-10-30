@@ -85,7 +85,6 @@ def make_cutin_scenario(network,
     time_to_wp1 = speedup_time + remaining_dis_to_wp1 / npc_speed + delay_time
     ego_travel_dis = ego_speed * time_to_wp1
     dis_threshold = dx0 + ego_travel_dis - npc_travel_dis
-    print(dis_threshold)
 
     # npc and follow waypoints (cutin waypoints) specification
     npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))
@@ -94,6 +93,10 @@ def make_cutin_scenario(network,
                                     acceleration=acceleration,
                                     condition=longitudinal_distance_to_ego_less_than(dis_threshold)))
 
+    # to show non-conservative
+    # npc1.add_action(FollowLane(target_speed=npc_speed,
+    #                         acceleration=acceleration,
+    #                         condition=longitudinal_distance_to_ego_less_than(dis_threshold)))
     return Scenario(network, [ego, npc1])
 
 if __name__ == '__main__':
