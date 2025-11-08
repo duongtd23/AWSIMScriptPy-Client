@@ -44,8 +44,6 @@ def make_scenario(network,
                                acceleration=acceleration,
                                condition=av_speed >= ego_speed - 1))
     npc1.add_action(FollowWaypoints(waypoints_calculation_callback=cal_cutin_waypoints,
-                                    target_speed=npc_speed,
-                                    acceleration=acceleration,
                                     condition=longitudinal_distance_to_ego <= dx0))
     return Scenario(network, [ego, npc1])
 

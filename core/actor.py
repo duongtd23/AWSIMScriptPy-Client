@@ -16,6 +16,9 @@ class Actor:
         ids_to_remove = []
         for (i,action) in enumerate(self.actions):
             completed = action.execute(self, global_state, client_node)
+            if not completed:
+                # skip the remaining actions until next tick
+                break
             if completed and action.one_shot:
                 ids_to_remove.insert(0, i)
 
