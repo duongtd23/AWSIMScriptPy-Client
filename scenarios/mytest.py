@@ -18,7 +18,7 @@ def make_scenario(network):
 
     # npc sequence: spawn only when ego comes closer than 20m
     npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))
-    npc1.add_action(FollowLane(condition=longitudinal_distance_to_ego_less_than(50),
+    npc1.add_action(FollowLane(condition=longitudinal_distance_to_ego <= 20,
                                target_speed=10))
     # npc1.add_action(SetTargetSpeed(speed=5.0))
 

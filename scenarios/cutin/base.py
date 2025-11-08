@@ -74,7 +74,7 @@ def make_cutin_scenario(network,
     # to show non-conservative
     # npc1.add_action(FollowLane(target_speed=npc_speed,
     #                         acceleration=acceleration,
-    #                         condition=longitudinal_distance_to_ego_less_than(dis_threshold)))
+    #                         condition=longitudinal_distance_to_ego <= dis_threshold))
     return Scenario(network, [ego, npc1])
 
 if __name__ == '__main__':

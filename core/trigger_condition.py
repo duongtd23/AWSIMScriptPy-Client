@@ -1,21 +1,23 @@
 from core.client_ros_node import AdsInternalStatus
+from map.network import LaneOffset
 import utils
 import numpy as np
 
 class Measurement:
-    """Wraps a numeric-measurement function and provides comparison operators
+    """
+    Wraps a numeric-measurement function and provides comparison operators
     that return boolean condition callables (actor, global_state) -> bool.
-
     Example usage:
         # returns a condition function
         cond = longitudinal_distance_to_ego < 10
-        # used later as cond(actor, global_state)
     """
     def __init__(self, func):
         self.func = func
 
     def value(self, actor, global_state):
-        """Return numeric measurement or None if not available."""
+        """
+        Return numeric measurement or None if not available.
+        """
         try:
             return self.func(actor, global_state)
         except Exception:
@@ -62,7 +64,6 @@ class Measurement:
     def __rge__(self, other):
         return self._make_comparison(lambda a, b: a >= b, other, swapped=True)
 
-# New measurement: returns numeric longitudinal distance (not adjusted by half-lengths)
 def _longitudinal_distance_to_ego_value(actor, global_state):
     if not global_state['actor-kinematics'] or not global_state['actor-sizes']:
         return None
@@ -79,7 +80,6 @@ def _longitudinal_distance_to_ego_value(actor, global_state):
     npc_heading = utils.normalize_angle_0_to_2pi(npc['pose']['rotation'][2]/180*np.pi)
 
     dis = utils.longitudinal_distance(ego_pos, npc_pos, ego_euler_angles)
-    # subtract front offsets (same as in the "less_than" wrapper)
     ego_root_to_front = global_state["actor-sizes"]["ego"]["size"][0]/2 + \
                         global_state["actor-sizes"]["ego"]["center"][0]
     if abs(ego_heading - npc_heading) < 0.5:
@@ -125,9 +125,48 @@ def _ego_speed_value(actor, global_state):
     vel = np.array(ego['twist']['linear'])
     return np.linalg.norm(vel)
 
+""" Function-based conditions"""
 def autonomous_mode_ready():
     def _cond(actor, global_state):
         return global_state['ads_internal_status'] >= AdsInternalStatus.AUTONOMOUS_MODE_READY.value
+    return _cond
+
+def end_lane(lane, network):
+    lane_obj = network.parse_lane(lane)
+    last_wp = lane_obj.way_points[-1]
+    def _cond(actor, global_state):
+        if not global_state['actor-kinematics']:
+            return False
+        npc = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
+        if not npc:
+            print(f'[ERROR] NPC {actor.actor_id} not found')
+            return False
+        pos = np.array(npc['pose']['position'])
+        front_center_point = actor.get_front_center(pos, npc['pose']['rotation'][2])
+        return np.linalg.norm(front_center_point[:2] - last_wp[:2]) < 0.1
+    return _cond
+
+def reach_point(point, network):
+    if isinstance(point, LaneOffset):
+        _, _, nppoint, _ = network.parse_lane_offset(point)
+    elif isinstance(point, np.ndarray):
+        nppoint = point
+    elif isinstance(point, list):
+        nppoint = np.array(point)
+    else:
+        raise TypeError('Unsupported point type. Use LaneOffset or np.ndarray')
+
+    def _cond(actor, global_state):
+        if not global_state['actor-kinematics']:
+            return False
+
+        npc = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
+        if not npc:
+            print(f'[ERROR] NPC {actor.actor_id} not found')
+            return False
+        pos = np.array(npc['pose']['position'])
+        front_center_point = actor.get_front_center(pos, npc['pose']['rotation'][2])
+        return np.linalg.norm(front_center_point[:2] - nppoint[:2]) < 0.1
     return _cond
 
 distance_to_ego = Measurement(_distance_to_ego_value)

@@ -65,11 +65,11 @@ def make_swerve_scenario(network,
     npc1.add_action(FollowWaypoints(waypoints=[utils.array_to_dict_pos(p) for p in waypoints],
                                     target_speed=npc_speed,
                                     acceleration=acceleration,
-                                    condition=longitudinal_distance_to_ego_less_than(dis_threshold)))
+                                    condition=longitudinal_distance_to_ego <= dis_threshold))
 
     # to show non-conservative
     # npc1.add_action(FollowLane(target_speed=npc_speed,
     #                         acceleration=acceleration,
-    #                         condition=longitudinal_distance_to_ego_less_than(dis_threshold)))
+    #                         condition=longitudinal_distance_to_ego <= dis_threshold))
 
     return Scenario(network, [ego, npc1])

@@ -152,6 +152,7 @@ class SetTargetSpeed(Action):
         msg.data = json.dumps(my_dict)
         client_node.set_target_speed_publisher.publish(msg)
         print(f"Sent set target speed to {actor.actor_id} successfully.")
+
 class ChangeLane(Action):
     def __init__(self, next_lane, lateral_velocity=1.0,
                  condition=None):
