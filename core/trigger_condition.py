@@ -171,5 +171,5 @@ def reach_point(point, network):
 
 distance_to_ego = Measurement(_distance_to_ego_value)
 longitudinal_distance_to_ego = Measurement(_longitudinal_distance_to_ego_value)
-speed = Measurement(_speed_value)
-ego_speed = Measurement(_ego_speed_value)
+actor_speed = Measurement(_speed_value)
+av_speed = Measurement(_ego_speed_value)
