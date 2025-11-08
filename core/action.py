@@ -11,12 +11,12 @@ class Action(ABC):
 
     def execute(self, actor, global_state, client_node):
         if self.should_trigger(actor, global_state):
-            self._do(actor, client_node)
+            self._do(actor, client_node, global_state)
             if self.callback is not None:
                 self.callback(self, actor)
             return True
         return False
 
     @abstractmethod
-    def _do(self, actor, client_node):
+    def _do(self, actor, client_node, global_state):
         pass

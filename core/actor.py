@@ -7,12 +7,7 @@ class Actor:
     def __init__(self, actor_id):
         # static properties
         self.actor_id = actor_id
-        self.state = {}
         self.actions = []
-
-    # TODO
-    # def update_state(self):
-    #     self.state = self.sim_api.get_actor_state(self.id)
 
     def add_action(self, action):
         self.actions.append(action)
@@ -37,6 +32,19 @@ class VehicleActor(Actor):
         super().__init__(actor_id)
         self.size = np.array(size)
         self.center = np.array(center)
+
+    def get_front_center(self, position, heading_deg):
+        """
+        :return: the front center point of the vehicle
+        """
+        front_center_local = self.center[:2] + np.array((self.size[0]/2, 0))
+        theta = np.deg2rad(heading_deg)
+        rot = np.array([
+            [np.cos(theta), -np.sin(theta)],
+            [np.sin(theta),  np.cos(theta)]
+        ])
+        _2dpoint = position[:2] + rot @ front_center_local
+        return np.append(_2dpoint, position[2])
 
 class EgoVehicle(VehicleActor):
     def __init__(self, size=(4.886,2.186,1.421), center=(1.424,0.0,0.973)):

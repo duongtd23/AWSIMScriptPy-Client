@@ -2,51 +2,135 @@ from core.client_ros_node import AdsInternalStatus
 import utils
 import numpy as np
 
-def longitudinal_distance_to_ego_less_than(threshold):
-    def _cond(actor, global_state):
-        if not global_state['actor-kinematics'] or not global_state['actor-sizes']:
-            return False
-        ego = global_state['actor-kinematics']['ego']
-        ego_pos = np.array(ego['pose']['position'])
-        ego_euler_angles = np.array(ego['pose']['rotation'])/180*np.pi
+class Measurement:
+    """Wraps a numeric-measurement function and provides comparison operators
+    that return boolean condition callables (actor, global_state) -> bool.
 
-        npc = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
-        if not npc:
-            # print(global_state['actor-kinematics'])
-            # print(f'[ERROR] NPC {actor.actor_id} not found')
-            return False
-        npc_pos = np.array(npc['pose']['position'])
+    Example usage:
+        # returns a condition function
+        cond = longitudinal_distance_to_ego < 10
+        # used later as cond(actor, global_state)
+    """
+    def __init__(self, func):
+        self.func = func
 
-        dis = utils.longitudinal_distance(ego_pos, npc_pos, ego_euler_angles)
+    def value(self, actor, global_state):
+        """Return numeric measurement or None if not available."""
+        try:
+            return self.func(actor, global_state)
+        except Exception:
+            return None
 
-        ego_root_to_front = global_state["actor-sizes"]["ego"]["size"][0]/2 + \
-                            global_state["actor-sizes"]["ego"]["center"][0]
-        npc_root_to_front = global_state["actor-sizes"][actor.actor_id]["size"][0]/2 + \
+    def _make_comparison(self, op, other, swapped=False):
+        # op: a binary function taking (a, b) and returning bool
+        def _cond(actor, global_state):
+            val = self.value(actor, global_state)
+            if val is None:
+                return False
+            try:
+                if swapped:
+                    return op(other, val)
+                return op(val, other)
+            except Exception:
+                return False
+
+        return _cond
+
+    # rich comparisons
+    def __lt__(self, other):
+        return self._make_comparison(lambda a, b: a < b, other)
+
+    def __le__(self, other):
+        return self._make_comparison(lambda a, b: a <= b, other)
+
+    def __gt__(self, other):
+        return self._make_comparison(lambda a, b: a > b, other)
+
+    def __ge__(self, other):
+        return self._make_comparison(lambda a, b: a >= b, other)
+
+    # reflected comparisons to allow writing e.g. 10 > measurement
+    def __rlt__(self, other):
+        return self._make_comparison(lambda a, b: a < b, other, swapped=True)
+
+    def __rle__(self, other):
+        return self._make_comparison(lambda a, b: a <= b, other, swapped=True)
+
+    def __rgt__(self, other):
+        return self._make_comparison(lambda a, b: a > b, other, swapped=True)
+
+    def __rge__(self, other):
+        return self._make_comparison(lambda a, b: a >= b, other, swapped=True)
+
+# New measurement: returns numeric longitudinal distance (not adjusted by half-lengths)
+def _longitudinal_distance_to_ego_value(actor, global_state):
+    if not global_state['actor-kinematics'] or not global_state['actor-sizes']:
+        return None
+    ego = global_state['actor-kinematics']['ego']
+    ego_pos = np.array(ego['pose']['position'])
+    ego_euler_angles = np.array(ego['pose']['rotation'])/180*np.pi
+
+    npc = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
+    if not npc:
+        return None
+    npc_pos = np.array(npc['pose']['position'])
+
+    ego_heading = utils.normalize_angle_0_to_2pi(ego_euler_angles[2])
+    npc_heading = utils.normalize_angle_0_to_2pi(npc['pose']['rotation'][2]/180*np.pi)
+
+    dis = utils.longitudinal_distance(ego_pos, npc_pos, ego_euler_angles)
+    # subtract front offsets (same as in the "less_than" wrapper)
+    ego_root_to_front = global_state["actor-sizes"]["ego"]["size"][0]/2 + \
+                        global_state["actor-sizes"]["ego"]["center"][0]
+    if abs(ego_heading - npc_heading) < 0.5:
+        # same direction
+        npc_root_to_back = global_state["actor-sizes"][actor.actor_id]["size"][0]/2 - \
+                        global_state["actor-sizes"][actor.actor_id]["center"][0]
+        return dis - ego_root_to_front - npc_root_to_back
+    else:
+        # opposite direction
+        npc_root_to_front = global_state["actor-sizes"][actor.actor_id]["size"][0] / 2 + \
                             global_state["actor-sizes"][actor.actor_id]["center"][0]
-        return dis - ego_root_to_front - npc_root_to_front <= threshold
+        return dis - ego_root_to_front - npc_root_to_front
 
-    return _cond
+def _distance_to_ego_value(actor, global_state):
+    if not global_state['actor-kinematics'] or not global_state['actor-sizes']:
+        return None
+    ego = global_state['actor-kinematics']['ego']
+    ego_pos = np.array(ego['pose']['position'])
 
-def distance_to_ego_less_than(threshold):
-    def _cond(actor, global_state):
-        if not global_state['actor-kinematics'] or not global_state['actor-sizes']:
-            return False
-        ego = global_state['actor-kinematics']['ego']
-        ego_pos = np.array(ego['pose']['position'])
+    npc = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
+    if not npc:
+        return None
 
-        npc = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
-        if not npc:
-            print(global_state['actor-kinematics'])
-            print(f'[ERROR] NPC {actor.actor_id} not found')
-            return False
+    npc_pos = np.array(npc['pose']['position'])
+    dis = np.linalg.norm(ego_pos - npc_pos)
+    return dis
 
-        npc_pos = np.array(npc['pose']['position'])
-        dis = np.linalg.norm(ego_pos - npc_pos)
-        return dis <= threshold
+def _speed_value(actor, global_state):
+    if not global_state['actor-kinematics']:
+        return None
 
-    return _cond
+    npc = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
+    if not npc:
+        return None
+    vel = np.array(npc['twist']['linear'])
+    return np.linalg.norm(vel)
+
+def _ego_speed_value(actor, global_state):
+    if not global_state['actor-kinematics']:
+        return None
+
+    ego = global_state['actor-kinematics']['ego']
+    vel = np.array(ego['twist']['linear'])
+    return np.linalg.norm(vel)
 
 def autonomous_mode_ready():
     def _cond(actor, global_state):
         return global_state['ads_internal_status'] >= AdsInternalStatus.AUTONOMOUS_MODE_READY.value
     return _cond
+
+distance_to_ego = Measurement(_distance_to_ego_value)
+longitudinal_distance_to_ego = Measurement(_longitudinal_distance_to_ego_value)
+speed = Measurement(_speed_value)
+ego_speed = Measurement(_ego_speed_value)

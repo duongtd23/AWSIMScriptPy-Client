@@ -1,30 +1,22 @@
 from core.scenario_manager import *
-from core.trigger_condition import autonomous_mode_ready
+from core.trigger_condition import *
 
-def longitudinal_distance_to_ego_less_than(threshold):
-    def _cond(actor, global_state):
-        if not global_state['actor-kinematics'] or not global_state['actor-sizes']:
-            return False
-        ego = global_state['actor-kinematics']['ego']
-        ego_pos = np.array(ego['pose']['position'])
-        ego_euler_angles = np.array(ego['pose']['rotation'])/180*np.pi
+def cutin_waypoints(wp1, npc_speed, cutin_vy, source_lane, current_wp_id, next_lane):
+    proj, _ = next_lane.project_point2D_onto_lane(wp1[:2])
+    lateral_dis = np.linalg.norm(proj - wp1[:2])
 
-        npc = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
-        if not npc:
-            print(global_state['actor-kinematics'])
-            print(f'[ERROR] NPC {actor.actor_id} not found')
-            return False
-        npc_pos = np.array(npc['pose']['position'])
+    angle = np.asin(cutin_vy / npc_speed)
+    diagonal = npc_speed * lateral_dis / cutin_vy
+    current_follow_wp = source_lane.way_points[current_wp_id] # the next waypoint ahead of the vehicle
+    direction = (current_follow_wp - wp1)[:2]
+    direction_normalized = direction / np.linalg.norm(direction)
 
-        dis = utils.longitudinal_distance(ego_pos, npc_pos, ego_euler_angles)
-
-        ego_root_to_front = global_state["actor-sizes"]["ego"]["size"][0]/2 + \
-                            global_state["actor-sizes"]["ego"]["center"][0]
-        npc_root_to_back = global_state["actor-sizes"][actor.actor_id]["size"][0]/2 - \
-                            global_state["actor-sizes"][actor.actor_id]["center"][0]
-        return dis - ego_root_to_front - npc_root_to_back <= threshold
-
-    return _cond
+    turning_side = utils.get_point_side(wp1[:2], current_follow_wp[:2], proj)
+    wp2 = utils.rotate_point(wp1[:2] + direction_normalized * diagonal,
+                             wp1[:2],
+                             turning_side * angle)
+    wp3 = wp2 + (0.4 * npc_speed + 5) * direction_normalized
+    return [wp1, np.append(wp2, wp1[2]), np.append(wp3, wp1[2])]
 
 def make_cutin_scenario(network,
                      ego_init_laneoffset,
@@ -58,24 +50,10 @@ def make_cutin_scenario(network,
 
     # cutin specification
     next_lane = network.parse_lane(cutin_next_lane)
-    proj, _ = next_lane.project_point2D_onto_lane(wp1[:2])
-    lateral_dis = np.linalg.norm(proj - wp1[:2])
 
     # 1st step: compute the waypoints
-    waypoints = [npc_init_pos, wp1]
-    angle = np.asin(cutin_vy / npc_speed)
-    diagonal = npc_speed * lateral_dis / cutin_vy
-    direction = (source_lane.way_points[_id + 1] - wp1)[:2]
-    direction_normalized = direction / np.linalg.norm(direction)
-
-    turning_side = utils.get_point_side(npc_init_pos[:2], wp1[:2], proj)
-    wp2 = utils.rotate_point(wp1[:2] + direction_normalized * diagonal,
-                             wp1[:2],
-                             turning_side * angle)
-    straight_direction = (wp1 - npc_init_pos)[:2]
-    wp3 = wp2 + (0.4*npc_speed+5) * straight_direction/np.linalg.norm(straight_direction)
-    waypoints.append(np.append(wp2, wp1[2]))
-    waypoints.append(np.append(wp3, wp1[2]))
+    waypoints = ([npc_init_pos] +
+                 cutin_waypoints(wp1, npc_speed, cutin_vy, source_lane, _id + 1, next_lane))
 
     # 2nd step: calculate distance to trigger npc movement
     speedup_time = npc_speed / acceleration
@@ -91,7 +69,7 @@ def make_cutin_scenario(network,
     npc1.add_action(FollowWaypoints(waypoints=[utils.array_to_dict_pos(p) for p in waypoints],
                                     target_speed=npc_speed,
                                     acceleration=acceleration,
-                                    condition=longitudinal_distance_to_ego_less_than(dis_threshold)))
+                                    condition=longitudinal_distance_to_ego <= dis_threshold))
 
     # to show non-conservative
     # npc1.add_action(FollowLane(target_speed=npc_speed,

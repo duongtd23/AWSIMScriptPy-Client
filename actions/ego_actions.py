@@ -12,7 +12,7 @@ class SpawnEgo(Action):
         self.position = position
         self.orientation = orientation
 
-    def _do(self, actor, client_node):
+    def _do(self, actor, client_node, global_state):
         """
         Spawn the ego vehicle and request (re-)localization
         :param position:
@@ -50,7 +50,7 @@ class SetGoalPose(Action):
         self.position = position
         self.orientation = orientation
 
-    def _do(self, actor, client_node):
+    def _do(self, actor, client_node, global_state):
         """
         Set goal for autonomous driving
         :param position:
@@ -65,7 +65,7 @@ class ActivateAutonomousMode(Action):
     def __init__(self, condition=None, callback=None):
         super().__init__(one_shot=True, condition=condition, callback=callback)
 
-    def _do(self, actor, client_node):
+    def _do(self, actor, client_node, global_state):
         client_node.send_engage_cmd()
 
 class SetVelocityLimit(Action):
@@ -77,7 +77,7 @@ class SetVelocityLimit(Action):
         super().__init__(one_shot=one_shot, condition=condition)
         self.max_velocity = max_velocity
 
-    def _do(self, actor, client_node):
+    def _do(self, actor, client_node, global_state):
         vel_limit_msg = VelocityLimit()
         vel_limit_msg.max_velocity = float(self.max_velocity)
         vel_limit_msg.use_constraints = False

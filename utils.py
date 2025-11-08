@@ -125,3 +125,6 @@ def get_point_side(A, B, P):
         return -1  # Right
     else:
         return 0  # Collinear
+
+def normalize_angle_0_to_2pi(angle):
+    return angle % (2 * np.pi)

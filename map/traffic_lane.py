@@ -48,10 +48,24 @@ class TrafficLane:
         prev_ids = [entry for entry in self.prev_lanes]
         return f'Lane #{self.id}, next: {next_ids}, prev: {prev_ids}'
 
+    def parse_wp_segment(self, point):
+        """
+        Get the segment on which the given point is located
+        :param point:
+        :return: the start index of the segment
+        """
+        for i in range(len(self.way_points) - 1):
+            _, projection_inside_segment = utils.project_point_to_segment_2d(point[:2],
+                                                                  self.way_points[i][:2],
+                                                                  self.way_points[i + 1][:2])
+            if projection_inside_segment:
+                return i
+        return -1
+
     def project_point2D_onto_lane(self, point2D):
         """
         :param point2D: np array
-        :return: pair {projection, flag}, where flag is true if the projection falls inside the lane.
+        :return: pair {projection, flag}, where flag is true iff the projection falls inside the lane.
         """
         min_dis = float("inf")
         result = None

@@ -144,6 +144,13 @@ class ClientNode(Node):
             qos_profile
         )
 
+        # set target speed
+        self.set_target_speed_publisher = self.create_publisher(
+            std_msgs.msg.String,
+            '/dynamic_control/vehicle/target_speed',
+            qos_profile
+        )
+
         # service clients
         # execute a script
         self.awsim_scenario_client = self.create_client(
