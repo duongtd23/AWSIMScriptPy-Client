@@ -15,7 +15,7 @@ python -m scenarios.random.ziczac2
 Make sure to source the folder where Autoware was installed first.
 Note that multiple scenarios can be passed and run sequentially, for example, see file [scenarios/cutin/all.py](scenarios/cutin/all.py).
 
-See [Predefined Actions](?tab=readme-ov-file#predefined-actions) and [Predefined Conditions](?tab=readme-ov-file#predefined-conditions) sections below for more details on how to specify scenarios using the Python interface.
+See [Predefined Actions](#predefined-actions) and [Predefined Conditions](#predefined-conditions) sections below for more details on how to specify scenarios using the Python interface.
 
 #### Using .script Files
 
