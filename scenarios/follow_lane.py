@@ -1,6 +1,6 @@
 from core.scenario_manager import *
 
-def follow_lane_scenario(node, network,
+def follow_lane_scenario(network,
                      npc_init_laneoffset,
                      npc_speed=30/3.6,
                      acceleration=5,
@@ -18,7 +18,7 @@ def follow_lane_scenario(node, network,
 
 if __name__ == '__main__':
     scenario_manager = ScenarioManager()
-    scenario =  follow_lane_scenario(scenario_manager.client_node, scenario_manager.network,
+    scenario =  follow_lane_scenario(scenario_manager.network,
                                      npc_init_laneoffset=LaneOffset('112', 88),
                                      npc_speed=30 / 3.6,
                                      acceleration=3)
