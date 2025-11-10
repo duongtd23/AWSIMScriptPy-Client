@@ -53,8 +53,19 @@ Then, in another terminal, run the desired scenario as a normal Python program:
 python -m scenarios.cutin.example
 ```
 Make sure to source the folder where Autoware was installed first.
-Note that multiple scenarios can be passed and run sequentially, for example, see file [scenarios/cutin/all.py](scenarios/cutin/all.py).
+The two videos below show the execution of this cut-in scenario with different viewpoints
 
+
+
+https://github.com/user-attachments/assets/43e1fe6b-6de3-400b-a8cd-b060a5faedb0
+
+
+
+https://github.com/user-attachments/assets/43dc5bcc-4524-4798-b50b-ff4e002a8168
+
+
+
+Note that multiple scenarios can be passed and run sequentially, for example, see file [scenarios/cutin/all.py](scenarios/cutin/all.py).
 See [Predefined Actions](#predefined-actions) and [Predefined Conditions](#predefined-conditions) sections below for more details on how to specify scenarios using the Python interface.
 
 #### Using .script Files
@@ -64,13 +75,13 @@ However, if you want to use the original `.script` files, please check [this fil
 ### Predefined Actions
 Some predefined actions for common tasks are available in [actions](actions) folder.
 #### Ego Vehicle Actions
-- `Spawning`: Spawn the ego vehicle at a specified position and orientation (precisely, reset initial pose), and perform ADS re-localization. Note that precise 3D coordinates can be obtained from a lane offset expression with our helper functions likes
+- `Spawning`: Spawn the ego vehicle at a specified position and orientation (precisely, reset initial pose), and perform ADS re-localization. Note that precise 3D coordinates can be obtained from a lane offset expression with our helper functions, like
   ```python
   _, _, position, orientation = network.parse_lane_offset(LaneOffset('111', 10))
   ```
 - `SetGoalPose`: Set the goal pose for the ego vehicle at a specified position and orientation. A goal is required for Autoware to perform autonomous driving.
 - `ActivateAutonomousMode`: Activate the autonomous driving mode in Autoware.
-This action should be specified with the condition that the autonomous driving mode is ready (at least after setting initial pose and goal pose).
+This action should be specified with the condition that the autonomous driving mode is ready (at least after setting the initial pose and goal pose).
 - `SetVelocityLimit`: Set the speed limit for the ego vehicle. Note that the real speed at each moment depends on Autoware's planning and control modules.
 
 ![Alt text](assets/network.png "Intersection with lane IDs")
