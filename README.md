@@ -1,18 +1,56 @@
 ## AWSIM-ScriptPy - A Flexible Interface for Scenario Specification in AWSIM-Labs and Autoware
 
-This is the client library of AWSIM-ScriptPy, a flexible interface for scenario specification in [AWSIM-Labs simulator](https://github.com/duongtd23/AWSIM-Labs/tree/dev) for [Autoware](https://github.com/autowarefoundation/autoware).
+This is the client library of AWSIM-ScriptPy, a flexible interface for scenario specification in the [AWSIM-Labs simulator](https://github.com/duongtd23/AWSIM-Labs) for the [Autoware](https://github.com/autowarefoundation/autoware) autonomous driving system (ADS).
 
-The server interface is implemented in the extended [AWSIM-Labs](https://github.com/duongtd23/AWSIM-Labs/tree/dev) simulator.
+The server interface is implemented in the extended [AWSIM-Labs](https://github.com/duongtd23/AWSIM-Labs) simulator.
 
 ### Usage
-#### Python Scenario Specification
+There are two possible ways to specify a scenario: using `.script` files (original AWSIM-Script) or using the Python interface.
+We recommend using the Python interface for more flexibility and expressiveness.
 
-We recommend specifying your scenarios using Python. Some example scenarios are available in [scenarios](scenarios) folder.
-To run a scenario, first launch the AWSIM-Labs simulator and Autoware, making sure that they are properly connected.
-Then, in another terminal, run the desired scenario as a normal Python program.
-For instance, to execute a ziczac scenario, use the following command:
+#### Python Scenario Specification
+Some example scenarios are available in [scenarios](scenarios) folder.
+Let's consider a cutin scenario, specified in [scenarios/cutin/example.py](scenarios/cutin/example.py) file:
+
+```python
+from core.scenario_manager import *
+from core.trigger_condition import *
+
+scenario_manager = ScenarioManager()
+network = scenario_manager.network
+_, _, init_pos, init_orient = network.parse_lane_offset(LaneOffset('111'))
+_, _, goal_pos, goal_orient = network.parse_lane_offset(LaneOffset('111', 130))
+ego = EgoVehicle()
+ego.add_action(SpawnEgo(position=init_pos, orientation=init_orient))
+ego.add_action(SetGoalPose(position=goal_pos, orientation=goal_orient))
+ego.add_action(ActivateAutonomousMode(condition=autonomous_mode_ready()))
+ego.add_action(SetVelocityLimit(30/3.6))
+
+_, source_lane, npc_init_pos, npc_init_orient = network.parse_lane_offset(LaneOffset('112', 70))
+npc1 = NPCVehicle("npc1", body_style=BodyStyle.HATCHBACK)
+next_lane = network.parse_lane('111')
+npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))
+npc1.add_action(FollowLane(target_speed=10/3.6,
+                           condition=av_speed >= 30/3.6-0.1))
+npc1.add_action(ChangeLane(next_lane=next_lane,
+                           lateral_velocity=1.2,
+                           condition=longitudinal_distance_to_ego <= 10))
+scenario = Scenario(network, [ego, npc1])
+scenario_manager.run([scenario])
+```
+
+There are two vehicles in this scenario: the ego vehicle and an NPC vehicle (`npc1`).
+Two lanes `111` and `112` are straight and parallel to each other, with `111` on the left of `112`.
+The ego vehicle spawns on lane `111` at offset `0m`, sets its goal at offset `130m` on the same lane, activates autonomous driving mode when ready, and sets its speed limit to `30 km/h` (thanks to the `parse_lane_offset` helper function).
+The NPC vehicle spawns on lane `112` at offset `70m`, but its motion is delayed.
+Once the ego vehicle's speed reaches `30 km/h`, the NPC vehicle starts to follow its current lane `112` at `10 km/h`.
+When the ego vehicle is within `10m` longitudinal distance to the NPC vehicle, the NPC vehicle changes to lane `111` with a lateral velocity of `1.2 m/s` (i.e., it cuts in front of the ego vehicle).
+Check the detailed explanation of predefined actions and conditions below for more details.
+
+To run this scenario, first launch the AWSIM-Labs simulator and Autoware, making sure that they are properly connected.
+Then, in another terminal, run the desired scenario as a normal Python program:
 ```bash
-python -m scenarios.random.ziczac2
+python -m scenarios.cutin.example
 ```
 Make sure to source the folder where Autoware was installed first.
 Note that multiple scenarios can be passed and run sequentially, for example, see file [scenarios/cutin/all.py](scenarios/cutin/all.py).
@@ -20,15 +58,8 @@ Note that multiple scenarios can be passed and run sequentially, for example, se
 See [Predefined Actions](#predefined-actions) and [Predefined Conditions](#predefined-conditions) sections below for more details on how to specify scenarios using the Python interface.
 
 #### Using .script Files
-
-To simulate a scenario specified in a `.script` file (original AWSIM-Script), you can use the `script_file_manager.py` utility as follows:
-```bash
-python script_file_manager.py <path-to-input-script-or-folder>
-```
-
-See `python script_file_manager.py -h` for more details.
-If a folder is given, each script file inside will be processed one by one.
-If using with [AW-RuntimeMonitor](https://github.com/duongtd23/AW-RuntimeMonitor/tree/awsimclient), a trace (text data and video) will be saved for each simulation (script file).
+Again, we recommend using the Python interface for more flexibility and expressiveness.
+However, if you want to use the original `.script` files, please check [this file](Origin-AWSIM-Script.md).
 
 ### Predefined Actions
 Some predefined actions for common tasks are available in [actions](actions) folder.
