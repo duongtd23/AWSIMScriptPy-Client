@@ -43,7 +43,7 @@ class Scenario:
                 self.subscribe_kinematics()
                 return
 
-            time.sleep(0.2)
+            # time.sleep(0.2)
 
     def terminate(self):
         self.running = False

@@ -8,20 +8,21 @@ def make_scenarios(network):
 
     # dynamic params
     vys = [1.0, 1.2, 1.4]
-    dx0s = [30, 26, 23]
+    dx0s = [31, 27, 24]
 
     # scenarios
     scenarios = []
     for (vy,dx0) in zip(vys, dx0s):
         scenarios.append(
             make_swerve_scenario(network,
-                                 ego_init_laneoffset=LaneOffset('355', 20),
-                                 ego_goal_laneoffset=LaneOffset('214', 5),
-                                 npc_init_laneoffset=LaneOffset('205', 65),
+                                 ego_init_laneoffset=LaneOffset('355', 10),
+                                 ego_goal_laneoffset=LaneOffset('214', 10),
+                                 npc_init_laneoffset=LaneOffset('205', 60),
                                  swerve_start_laneoffset=LaneOffset('205', 70),
                                  ego_speed=ve,
                                  npc_speed=vo,
                                  swerve_vy=vy,
+                                 body_style=BodyStyle.SMALL_CAR,
                                  dx0=dx0
                                 ))
     return scenarios
