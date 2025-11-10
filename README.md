@@ -2,12 +2,14 @@
 
 This is the client library of AWSIM-ScriptPy, a flexible interface for scenario specification in [AWSIM-Labs simulator](https://github.com/duongtd23/AWSIM-Labs/tree/dev) for [Autoware](https://github.com/autowarefoundation/autoware).
 
-The implementation of simulator server interface is available at the extended [AWSIM-Labs](https://github.com/duongtd23/AWSIM-Labs/tree/dev).
+The server interface is implemented in the extended [AWSIM-Labs](https://github.com/duongtd23/AWSIM-Labs/tree/dev) simulator.
 
 ### Usage
 #### Python Scenario Specification
 
 We recommend specifying your scenarios using Python. Some example scenarios are available in [scenarios](scenarios) folder.
+To run a scenario, first launch the AWSIM-Labs simulator and Autoware, making sure that they are properly connected.
+Then, in another terminal, run the desired scenario as a normal Python program.
 For instance, to execute a ziczac scenario, use the following command:
 ```bash
 python -m scenarios.random.ziczac2
@@ -66,7 +68,9 @@ To control how fast the lane change is performed, we can also specify `lateral_v
       lateral_velocity=1.3, 
       condition=reach_point(LaneOffset('123', 10), network)))
   ```
-- `FollowWaypoints`: Make the NPC vehicle follow a sequence of specified waypoints (3D positions). There are two ways to use this action:
+- `FollowWaypoints`: Make the NPC vehicle follow a sequence of specified waypoints (3D positions) (forming the vehicle trajectory).
+The front-center point of the vehicle will follow the specified waypoints in order, i.e., once the front-center point reaches a waypoint, it will head to the next waypoint. 
+There are two ways to use this action:
   - Specify a waypoint sequence directly at the time of action initialization:
   ```python
   waypoints = [

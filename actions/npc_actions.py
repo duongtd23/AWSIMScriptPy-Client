@@ -128,6 +128,7 @@ class FollowWaypoints(Action):
         msg.data = json.dumps(my_dict)
         client_node.follow_waypoints_publisher.publish(msg)
         print(f"Sent follow waypoints command to {actor.actor_id} successfully.")
+
 class SetTargetSpeed(Action):
     def __init__(self, target_speed, condition=None, acceleration=None, deceleration=None):
         super().__init__(condition=condition, one_shot=True)
