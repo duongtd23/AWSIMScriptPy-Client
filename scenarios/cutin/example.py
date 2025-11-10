@@ -47,7 +47,7 @@ if __name__ == '__main__':
                               cutin_next_lane='111',
                               _ego_speed=30/3.6,
                               _npc_speed=10/3.6,
-                              _cutin_vy=1.2,
-                              dx0=10
+                              _cutin_vy=1.0,
+                              dx0=15
                             )
     scenario_manager.run([scenario])
