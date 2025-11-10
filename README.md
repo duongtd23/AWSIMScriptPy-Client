@@ -33,8 +33,8 @@ npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orie
 npc1.add_action(FollowLane(target_speed=10/3.6,
                            condition=av_speed >= 30/3.6-0.1))
 npc1.add_action(ChangeLane(next_lane=next_lane,
-                           lateral_velocity=1.2,
-                           condition=longitudinal_distance_to_ego <= 10))
+                           lateral_velocity=1.0,
+                           condition=longitudinal_distance_to_ego <= 15))
 scenario = Scenario(network, [ego, npc1])
 scenario_manager.run([scenario])
 ```
@@ -44,7 +44,7 @@ Two lanes `111` and `112` are straight and parallel to each other, with `111` on
 The ego vehicle spawns on lane `111` at offset `0m`, sets its goal at offset `130m` on the same lane, activates autonomous driving mode when ready, and sets its speed limit to `30 km/h` (thanks to the `parse_lane_offset` helper function).
 The NPC vehicle spawns on lane `112` at offset `70m`, but its motion is delayed.
 Once the ego vehicle's speed reaches `30 km/h`, the NPC vehicle starts to follow its current lane `112` at `10 km/h`.
-When the ego vehicle is within `10m` longitudinal distance to the NPC vehicle, the NPC vehicle changes to lane `111` with a lateral velocity of `1.2 m/s` (i.e., it cuts in front of the ego vehicle).
+When the ego vehicle is within `15m` longitudinal distance to the NPC vehicle, the NPC vehicle changes to lane `111` with a lateral velocity of `1.0 m/s` (i.e., it cuts in front of the ego vehicle).
 Check the detailed explanation of predefined actions and conditions below for more details.
 
 To run this scenario, first launch the AWSIM-Labs simulator and Autoware, making sure that they are properly connected.
@@ -61,7 +61,11 @@ https://github.com/user-attachments/assets/43e1fe6b-6de3-400b-a8cd-b060a5faedb0
 
 
 
-https://github.com/user-attachments/assets/43dc5bcc-4524-4798-b50b-ff4e002a8168
+
+
+https://github.com/user-attachments/assets/a753aff0-4d94-4dc2-ad40-93fb25c0a6cc
+
+
 
 
 
