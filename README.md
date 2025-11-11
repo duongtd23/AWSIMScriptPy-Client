@@ -47,8 +47,12 @@ Once the ego vehicle's speed reaches `30 km/h`, the NPC vehicle starts to follow
 When the ego vehicle is within `15m` longitudinal distance to the NPC vehicle, the NPC vehicle changes to lane `111` with a lateral velocity of `1.0 m/s` (i.e., it cuts in front of the ego vehicle).
 Check the detailed explanation of predefined actions and conditions below for more details.
 
-To run this scenario, first launch the AWSIM-Labs simulator and Autoware, making sure that they are properly connected.
-Then, in another terminal, run the desired scenario as a normal Python program:
+To run this scenario, first launch the AWSIM-Labs simulator and Autoware.
+An instruction to run AWSIM-Labs and Autoware is available in the [AWSIM-Labs repo](https://github.com/duongtd23/AWSIM-Labs?tab=readme-ov-file#1-launch-awsim-labs-and-autoware)
+Note that Autoware is not needed if the scenario specification does not include the ego vehicle.
+
+After launching the two tools and they are properly connected, 
+in another terminal, run the scenario above as a normal Python program:
 ```bash
 python -m scenarios.cutin.example
 ```

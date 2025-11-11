@@ -194,21 +194,18 @@ class ChangeLane(Action):
         wp0 = projection + direction * long_dis
         waypoints = [front_center_point, np.append(wp0, front_center_point[2])]
 
+        # add one more waypoint for smooth steering back
+        wp1 = wp0 + direction * current_speed * 0.52 + 4
+        waypoints.append(np.append(wp1, front_center_point[2]))
+
         next_wp_id = next_lane_wp_id + 1
         while next_wp_id < len(self.next_lane.way_points):
             next_wp = self.next_lane.way_points[next_wp_id][:2]
-            if np.dot(direction, next_wp - wp0) > 0:
+            if np.dot(direction, next_wp - wp1) > 0:
                 break
             next_wp_id += 1
 
         if next_wp_id < len(self.next_lane.way_points):
-            next_wp = self.next_lane.way_points[next_wp_id][:2]
-            if np.linalg.norm(wp0 - next_wp) > 30:
-                # if the next waypoint is too far, add a middle waypoint;
-                # otherwise, the vehicle may steering back slowly
-                wp1 = wp0 + direction * 10
-                waypoints.append(np.append(wp1, front_center_point[2]))
-
             waypoints += self.next_lane.way_points[next_wp_id:]
 
         my_dict = {
