@@ -20,9 +20,19 @@ scenario_manager.run([scenario])
 The lanes `123` and `124` are shown in the figure below:
 ![Random Scenario Lanes](../../assets/network.png)
 
-This video below records the scenario execution:
+The video below records the scenario execution:
+
+
+
+https://github.com/user-attachments/assets/53aa2450-3bb1-4487-85b4-e0758361bcad
+
 
 ### 2. [zigzag.py](zigzag.py)
 A scenario with two vehicles: the ego vehicle controlled by Autoware and an NPC vehicle that performs zigzag driving.
 
+This video was recorded during the scenario execution from a camera mounted on the top of the ego vehicle:
+
+
+
+https://github.com/user-attachments/assets/46f7e6a8-b10b-483d-8a91-2abd988f0b89
 
