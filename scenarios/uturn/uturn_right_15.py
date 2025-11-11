@@ -23,7 +23,7 @@ def make_scenarios(network):
             make_uturn_scenario(network,
                                 ego_init_laneoffset=ego_init_laneoffset,
                                 ego_goal_laneoffset=ego_goal_laneoffset,
-                                npc_init_laneoffset=LaneOffset('521', 37),
+                                npc_init_laneoffset=LaneOffset('521', 32),
                                 uturn_next_lane='511',
                                 _ego_speed=ve/3.6,
                                 _npc_speed=vo,

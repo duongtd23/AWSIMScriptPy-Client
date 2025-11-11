@@ -24,7 +24,7 @@ def make_cutin_scenario(network,
     ego.add_action(SetVelocityLimit(_ego_speed,one_shot=True))
 
     # NPC specification
-    _, source_lane, npc_init_pos, npc_init_orient = network.parse_lane_offset(npc_init_laneoffset)
+    _, _, npc_init_pos, npc_init_orient = network.parse_lane_offset(npc_init_laneoffset)
     npc1 = NPCVehicle("npc1", body_style)
 
     next_lane = network.parse_lane(cutin_next_lane)

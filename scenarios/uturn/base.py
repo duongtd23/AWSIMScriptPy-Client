@@ -44,7 +44,7 @@ def  make_uturn_scenario(network,
         return [utils.array_to_dict_pos(p) for p in waypoints]
 
     # npc specification
-    _, source_lane, npc_init_pos, npc_init_orient = network.parse_lane_offset(npc_init_laneoffset)
+    _, _, npc_init_pos, npc_init_orient = network.parse_lane_offset(npc_init_laneoffset)
     npc1 = NPCVehicle("npc1", body_style)
     npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))
     npc1.add_action(FollowLane(target_speed=_npc_speed,
