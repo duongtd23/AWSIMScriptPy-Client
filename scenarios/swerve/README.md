@@ -76,3 +76,7 @@ Even the swerve maneuver has a specific trajectory that does not lie on the cent
 The only technical task is to implement the waypoint calculation logic encapsulated in the `cal_waypoints` function.
 
 ### Scenario Execution
+
+This is the recorded video of a scenario execution
+
+https://github.com/user-attachments/assets/fdfad184-a37a-40c3-8b3d-7d1732241888
