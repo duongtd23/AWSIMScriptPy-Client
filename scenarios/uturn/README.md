@@ -74,3 +74,17 @@ The example above demonstrates that AWSIM-ScriptPy's flexible waypoint-based act
 Similar to the swerve scenarios, the only technical task is to implement the waypoint calculation logic encapsulated in the `cal_waypoints` function.
 
 ### Scenario Execution
+
+This is a recorded video when the ego is in the rightmost lane
+
+
+https://github.com/user-attachments/assets/b10bed76-2022-43d4-b584-6be8decae5c2
+
+
+
+Below is a recorded video of  when the ego is in the adjacent lane to the rightmost lane
+
+
+
+https://github.com/user-attachments/assets/9b19b8bc-27a8-4591-a0c1-3c948e20a5d6
+
