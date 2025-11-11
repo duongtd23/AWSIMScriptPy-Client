@@ -1,6 +1,25 @@
-from scenarios.cutin.base import cutin_waypoints
+"""
+Another specification for the cutin scenarios
+"""
 from core.trigger_condition import *
 from core.scenario_manager import *
+
+def cutin_waypoints(wp1, npc_speed, cutin_vy, source_lane, current_wp_id, next_lane):
+    proj, _ = next_lane.project_point2D_onto_lane(wp1[:2])
+    lateral_dis = np.linalg.norm(proj - wp1[:2])
+
+    angle = np.asin(cutin_vy / npc_speed)
+    diagonal = npc_speed * lateral_dis / cutin_vy
+    current_follow_wp = source_lane.way_points[current_wp_id] # the next waypoint ahead of the vehicle
+    direction = (current_follow_wp - wp1)[:2]
+    direction_normalized = direction / np.linalg.norm(direction)
+
+    turning_side = utils.get_point_side(wp1[:2], current_follow_wp[:2], proj)
+    wp2 = utils.rotate_point(wp1[:2] + direction_normalized * diagonal,
+                             wp1[:2],
+                             turning_side * angle)
+    wp3 = wp2 + (0.4 * npc_speed + 5) * direction_normalized
+    return [wp1, np.append(wp2, wp1[2]), np.append(wp3, wp1[2])]
 
 def make_scenario(network,
                  ego_init_laneoffset,

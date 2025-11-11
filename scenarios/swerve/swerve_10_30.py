@@ -18,9 +18,8 @@ def make_scenarios(network):
                                  ego_init_laneoffset=LaneOffset('355', 10),
                                  ego_goal_laneoffset=LaneOffset('214', 10),
                                  npc_init_laneoffset=LaneOffset('205', 60),
-                                 swerve_start_laneoffset=LaneOffset('205', 70),
-                                 ego_speed=ve,
-                                 npc_speed=vo,
+                                 _ego_speed=ve,
+                                 _npc_speed=vo,
                                  swerve_vy=vy,
                                  body_style=BodyStyle.SMALL_CAR,
                                  dx0=dx0

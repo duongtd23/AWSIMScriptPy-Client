@@ -24,10 +24,9 @@ def make_scenarios(network):
                                 ego_init_laneoffset=ego_init_laneoffset,
                                 ego_goal_laneoffset=ego_goal_laneoffset,
                                 npc_init_laneoffset=LaneOffset('521', 37),
-                                uturn_start_laneoffset=LaneOffset('521', 43),
                                 uturn_next_lane='511',
-                                ego_speed=ve/3.6,
-                                npc_speed=vo,
+                                _ego_speed=ve/3.6,
+                                _npc_speed=vo,
                                 dx0=dx0
                                 ))
     return scenarios

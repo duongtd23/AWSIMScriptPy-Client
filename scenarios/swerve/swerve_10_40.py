@@ -9,7 +9,7 @@ def make_scenarios(network):
     # dynamic params
     vys = [1.0, 1.2, 1.4]
     dx0s = [39, 34, 30]
-    offsets = [65, 70, 74]
+    offsets = [57, 62, 66]
 
     # scenarios
     scenarios = []
@@ -18,10 +18,9 @@ def make_scenarios(network):
             make_swerve_scenario(network,
                                  ego_init_laneoffset=LaneOffset('268'),
                                  ego_goal_laneoffset=LaneOffset('214', 26),
-                                 npc_init_laneoffset=LaneOffset('205', offset-8),
-                                 swerve_start_laneoffset=LaneOffset('205', offset+2),
-                                 ego_speed=ve,
-                                 npc_speed=vo,
+                                 npc_init_laneoffset=LaneOffset('205', offset),
+                                 _ego_speed=ve,
+                                 _npc_speed=vo,
                                  swerve_vy=vy,
                                  body_style=BodyStyle.SMALL_CAR,
                                  dx0=dx0

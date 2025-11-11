@@ -1,3 +1,6 @@
+"""
+Another specification for the cutin scenarios
+"""
 from core.scenario_manager import *
 from core.trigger_condition import *
 
@@ -54,7 +57,7 @@ def make_cutin_scenario(node, network,
     npc1.add_action(FollowWaypoints(waypoints=[utils.array_to_dict_pos(p) for p in waypoints],
                                     target_speed=npc_speed,
                                     acceleration=acceleration,
-                                    condition=distance_to_ego_less_than(dx0)))
+                                    condition=distance_to_ego <= dx0))
 
     return Scenario(network, [ego, npc1])
 

@@ -49,7 +49,7 @@ Check the detailed explanation of predefined actions and conditions below for mo
 
 To run this scenario, first launch the AWSIM-Labs simulator and Autoware.
 An instruction to run AWSIM-Labs and Autoware is available in the [AWSIM-Labs repo](https://github.com/duongtd23/AWSIM-Labs?tab=readme-ov-file#1-launch-awsim-labs-and-autoware)
-Note that Autoware is not needed if the scenario specification does not include the ego vehicle.
+Note that Autoware is not needed if the ego actor does not appear in the scenario specification.
 
 After launching the two tools and they are properly connected, 
 in another terminal, run the scenario above as a normal Python program:
@@ -57,7 +57,7 @@ in another terminal, run the scenario above as a normal Python program:
 python -m scenarios.cutin.example
 ```
 Make sure to source the folder where Autoware was installed first.
-The two videos below show the execution of this cut-in scenario with different viewpoints
+The two videos below show the execution of this cut-in scenario under two different viewpoints:
 
 
 

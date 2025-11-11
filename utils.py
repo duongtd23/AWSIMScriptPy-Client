@@ -128,3 +128,10 @@ def get_point_side(A, B, P):
 
 def normalize_angle_0_to_2pi(angle):
     return angle % (2 * np.pi)
+
+def extended_point_scale(speed):
+    """
+    Mainly used for calculating the extended waypoint (after cutin, swerve, etc) to make
+    the vehicle steer more smoothly.
+    """
+    return speed * 0.52 + 4.0

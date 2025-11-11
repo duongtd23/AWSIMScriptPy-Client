@@ -195,7 +195,7 @@ class ChangeLane(Action):
         waypoints = [front_center_point, np.append(wp0, front_center_point[2])]
 
         # add one more waypoint for smooth steering back
-        wp1 = wp0 + direction * current_speed * 0.52 + 4
+        wp1 = wp0 + direction * utils.extended_point_scale(current_speed)
         waypoints.append(np.append(wp1, front_center_point[2]))
 
         next_wp_id = next_lane_wp_id + 1
