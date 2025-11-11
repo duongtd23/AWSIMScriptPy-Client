@@ -34,5 +34,6 @@ This video was recorded during the scenario execution from a camera mounted on t
 
 
 
-https://github.com/user-attachments/assets/46f7e6a8-b10b-483d-8a91-2abd988f0b89
+https://github.com/user-attachments/assets/fc4d83dc-0443-4e7f-932f-696ab2336357
+
 
