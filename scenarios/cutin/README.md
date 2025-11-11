@@ -5,7 +5,7 @@ The following figure (from the JAMA Standard) illustrates an example of a cut-in
 
 ![Cut-in Scenario](../../assets/fig-cutin1.jpeg)
 
-The ego vehicle (in red) is traveling straight in its lane at a constant speed of $ve$
+The ego vehicle (in red) is traveling straight in its lane at a constant speed of $ve$.
 An NPC vehicle (in blue) traveling in the adjacent lane abruptly at a constant speed of $vo$ cuts in front of the ego vehicle.
 The JAMA standard introduces various parameters to define a concrete cut-in scenario (see the figure above):
 - $dx_0$: Longitudinal distance between the ego vehicle and the NPC vehicle when the cut-in starts.
@@ -39,3 +39,10 @@ Once the longitudinal distance between the NPC vehicle and the ego vehicle becom
 We argue that these cut-in scenarios can be easily specified in AWSIM-ScriptPy with its predefined actions and conditions.
 
 ### Scenario Execution
+
+As described in the [main README](../../README.md), these scenarios can be executed as normal Python programs.
+The video below shows an example execution of a cut-in scenario in the AWSIM-Labs simulator.
+The video was recorded from a camera mounted on the top of the ego vehicle (and the ego vehicle is controlled by Autoware).
+
+https://github.com/user-attachments/assets/a753aff0-4d94-4dc2-ad40-93fb25c0a6cc
+

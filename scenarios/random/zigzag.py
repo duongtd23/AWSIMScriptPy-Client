@@ -29,7 +29,7 @@ def make_scenario(network,
 
     npc1 = NPCVehicle("npc1", body_style)
 
-    # ziczac specification
+    # zigzag specification
     waypoints = [npc_init_pos, wp1]
 
     direction = (source_lane.way_points[_id + 1] - wp1)[:2]

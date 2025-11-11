@@ -17,7 +17,7 @@ def make_scenarios(network):
             make_cutin_scenario(network,
                                 ego_init_laneoffset=LaneOffset('111', 0),
                                 ego_goal_laneoffset=LaneOffset('111', 210),
-                                npc_init_laneoffset=LaneOffset('112', 117),
+                                npc_init_laneoffset=LaneOffset('112', 120),
                                 cutin_next_lane='111',
                                 _ego_speed=ego_speed,
                                 _npc_speed=npc_speed,

@@ -10,11 +10,13 @@ def make_scenario(network):
                                acceleration=7))
     npc1.add_action(ChangeLane(next_lane=network.parse_lane('124'), lateral_velocity=1.3,
                                condition=reach_point(LaneOffset('123', 12), network)))
-    npc1.add_action(FollowLane('TrafficLane.335',
-                               target_speed=3,
-                               condition=end_lane('TrafficLane.124', network)))
-    # npc1.add_action(SetTargetSpeed(target_speed=1,
+    
+    # other actions to play with
+    # npc1.add_action(SetTargetSpeed(target_speed=2,
     #                                condition=speed >= 15/3.6))
+    # npc1.add_action(FollowLane('TrafficLane.335',
+    #                            target_speed=3,
+    #                            condition=end_lane('TrafficLane.124', network)))
 
     return Scenario(network, [npc1])
 
