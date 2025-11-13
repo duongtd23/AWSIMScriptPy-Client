@@ -175,3 +175,7 @@ Some predefined conditions for action triggering are available in [core/trigger_
 You can define new actions by extending the `Action` class (defined in [core/action.py](core/action.py) file), and implementing the `_do(actor, global_state)` method.  This method is called when the action is triggered for the given `actor`, with the current `global_state`. See the existing actions in [actions](actions) folder for reference.
 
 Similarly, you can define new trigger conditions. If the condition involves numeric comparisons (like distance or speed comparisons), we recommend to use the predefined wrapper class `Measurement` (defined in [core/trigger_condition.py](core/trigger_condition.py) file) to implement the condition. See the existing conditions like `distance_to_ego` and `actor_speed` for reference.
+
+
+### Example Scenarios
+In the [scenarios](scenarios) folder, you can find some example scenarios that demonstrate the expressiveness of AWSIM-ScriptPy.
