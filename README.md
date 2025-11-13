@@ -105,9 +105,9 @@ This action should be specified with the condition that the autonomous driving m
        condition=end_lane('TrafficLane.124', network)))
   ```
 
-  - We can also specify a desired speed profile, by passing `target_speed` (m/s), `acceleration` (m/s^2), and `deceleration` (m/s^2). If `target_speed` is not specified, the NPC vehicle will follow the speed limit of the lane. If `acceleration` or `deceleration` is not specified, a default comfortable value will be used.
+  - We can also specify a desired speed profile, by passing `target_speed` (m/s) and `acceleration` (m/s^2). If `target_speed` is not specified, the NPC vehicle will follow the speed limit of the lane. `acceleration` value will be used for both speeding up and braking. If `acceleration` is not specified, a default-comfortable value will be used.
 
-- `SetTargetSpeed`: Set the target speed for the NPC vehicle. The vehicle will accelerate or decelerate to reach the target speed. Again, we can also specify desired `acceleration` and `deceleration`. By passing the `target_speed=0`, we can make the NPC vehicle stop.
+- `SetTargetSpeed`: Set the target speed for the NPC vehicle. The vehicle will accelerate or decelerate to reach the target speed. Again, we can also specify desired `acceleration`. By passing the `target_speed=0`, we can make the NPC vehicle stop.
 
 - `ChangeLane`: Make the NPC vehicle change to the given `next_lane` argument. The lane must be adjacent to the current lane of the vehicle.
 To control how fast the lane change is performed, we can also specify `lateral_velocity` (in m/s). For instance, if `npc1` is currently on lane `123`, which is on the left of lane `124` in the figure above, the following code makes it change to lane `124` with a lateral velocity of `1.3` m/s when it reaches the point at offset 10m on lane `123`:

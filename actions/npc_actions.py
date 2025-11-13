@@ -6,49 +6,40 @@ from core.actor import NPCVehicle
 from core.client_ros_node import *
 
 class SpawnNPCVehicle(Action):
-    def __init__(self, position, orientation, condition=None):
+    def __init__(self, position=None, orientation=None,
+                 pose_callback=None, condition=None):
         """
+        Either {position, orientation} or pose_callback must be defined.
         :param position: np array
         :param orientation: np array
+        :param pose_callback: function that takes (actor, global_state) and returns (position, orientation)
         :return:
         """
         super().__init__(condition=condition, one_shot=True)
         self.position = position
         self.orientation = orientation
+        self.pose_callback = pose_callback
 
     def _do(self, actor:NPCVehicle, client_node, global_state):
+        pos = self.position
+        orient = self.orientation
+        if self.pose_callback is not None:
+            pos, orient = self.pose_callback(actor, global_state)
         my_dict = {
             "name": actor.actor_id,
             "body_style": actor.body_style.value,
-            "position": utils.array_to_dict_pos(self.position),
-            "orientation": utils.array_to_dict_orient(self.orientation)
+            "position": utils.array_to_dict_pos(pos),
+            "orientation": utils.array_to_dict_orient(orient)
         }
 
         msg = std_msgs.msg.String()
         msg.data = json.dumps(my_dict)
         client_node.dynamic_npc_spawning_publisher.publish(msg)
 
-        # do a service request to confirm the spawning
-        req = DynamicControl.Request()
-        req.json_request = msg.data
-        retry = 0
-        while retry < 10:
-            future = client_node.dynamic_npc_spawning_client.call_async(req)
-            rclpy.spin_until_future_complete(client_node, future)
-            response = future.result()
-            if response.status.success:
-                print(f"Spawned NPC vehicle {actor.actor_id}")
-                break
-
-            time.sleep(0.5)
-            retry += 1
-
-        if retry >= 10:
-            client_node.get_logger().error(f"Failed to spawn NPC vehicle, "
-                                           f"error message: {response.status.message}")
+        client_node.get_logger().info(f"Spawned NPC vehicle {actor.actor_id}")
 
 class FollowLane(Action):
-    def __init__(self, lane=None, condition=None, target_speed=None, acceleration=None, deceleration=None):
+    def __init__(self, lane=None, condition=None, target_speed=None, acceleration=None):
         super().__init__(condition=condition, one_shot=True)
 
         # if lane is None, following the lane on which the actor currently located.
@@ -57,33 +48,29 @@ class FollowLane(Action):
         self.lane = lane
 
         # if target_speed is None, it follows the speed limit of the current lane
-        # if acceleation/deceleration is None, the default values will be used
+        # if acceleration is None, the default values will be used
         self.target_speed = target_speed
         self.acceleration = acceleration
-        self.deceleration = deceleration
 
     def _do(self, actor:NPCVehicle, client_node, global_state):
         is_speed_defined = self.target_speed is not None
         is_acceleration_defined = self.acceleration is not None
-        is_deceleration_defined = self.deceleration is not None
         my_dict = {
             "target": actor.actor_id,
             "lane": "" if self.lane is None else self.lane,
             "speed": self.target_speed if is_speed_defined else 0,
-            "acceleration": self.acceleration if is_acceleration_defined else 0,
-            "deceleration": self.deceleration if is_deceleration_defined else 0,
+            "acceleration": math.fabs(self.acceleration) if is_acceleration_defined else 0,
             "is_speed_defined": is_speed_defined,
             "is_acceleration_defined": is_acceleration_defined,
-            "is_deceleration_defined": is_deceleration_defined
         }
         msg = std_msgs.msg.String()
         msg.data = json.dumps(my_dict)
         client_node.follow_lane_publisher.publish(msg)
-        print(f"Sent follow lane command to {actor.actor_id} successfully.")
+        client_node.get_logger().info(f"Sent follow lane command to {actor.actor_id} successfully.")
 
 class FollowWaypoints(Action):
     def __init__(self, waypoints=None, waypoints_calculation_callback=None,
-                 condition=None, target_speed=None, acceleration=None, deceleration=None):
+                 condition=None, target_speed=None, acceleration=None):
         """
         Either waypoints or waypoints_calculation_callback must be defined.
         :param waypoints:
@@ -91,7 +78,6 @@ class FollowWaypoints(Action):
         :param condition:
         :param target_speed:
         :param acceleration:
-        :param deceleration:
         """
         if waypoints is None and waypoints_calculation_callback is None:
             raise ValueError("waypoints or waypoints_calculation_callback must be defined")
@@ -100,59 +86,51 @@ class FollowWaypoints(Action):
         self.waypoints_calculation_callback = waypoints_calculation_callback
 
         # if target_speed is None, it follows the speed limit of the current lane
-        # if acceleation/deceleration is None, the default values will be used
+        # if acceleration is None, the default values will be used
         self.target_speed = target_speed
         self.acceleration = acceleration
-        self.deceleration = deceleration
 
     def _do(self, actor:NPCVehicle, client_node, global_state):
         waypoints = self.waypoints
         if waypoints is None:
             waypoints = self.waypoints_calculation_callback(actor, global_state)
-            print(waypoints)
+            client_node.get_logger().info(waypoints)
         is_speed_defined = self.target_speed is not None
         is_acceleration_defined = self.acceleration is not None
-        is_deceleration_defined = self.deceleration is not None
 
         my_dict = {
             "target": actor.actor_id,
             "waypoints": waypoints,
             "speed": self.target_speed if is_speed_defined else 0,
-            "acceleration": self.acceleration if is_acceleration_defined else 0,
-            "deceleration": self.deceleration if is_deceleration_defined else 0,
+            "acceleration": math.fabs(self.acceleration) if is_acceleration_defined else 0,
             "is_speed_defined": is_speed_defined,
             "is_acceleration_defined": is_acceleration_defined,
-            "is_deceleration_defined": is_deceleration_defined
         }
         msg = std_msgs.msg.String()
         msg.data = json.dumps(my_dict)
         client_node.follow_waypoints_publisher.publish(msg)
-        print(f"Sent follow waypoints command to {actor.actor_id} successfully.")
+        client_node.get_logger().info(f"Sent follow waypoints command to {actor.actor_id} successfully.")
 
 class SetTargetSpeed(Action):
-    def __init__(self, target_speed, condition=None, acceleration=None, deceleration=None):
+    def __init__(self, target_speed, condition=None, acceleration=None):
         super().__init__(condition=condition, one_shot=True)
 
-        # if acceleation/deceleration is None, the default values will be used
+        # if acceleration is None, the default values will be used
         self.target_speed = target_speed
         self.acceleration = acceleration
-        self.deceleration = deceleration
 
     def _do(self, actor:NPCVehicle, client_node, global_state):
         is_acceleration_defined = self.acceleration is not None
-        is_deceleration_defined = self.deceleration is not None
         my_dict = {
             "target": actor.actor_id,
             "speed": self.target_speed,
-            "acceleration": self.acceleration if is_acceleration_defined else 0,
-            "deceleration": self.deceleration if is_deceleration_defined else 0,
+            "acceleration": math.fabs(self.acceleration) if is_acceleration_defined else 0,
             "is_acceleration_defined": is_acceleration_defined,
-            "is_deceleration_defined": is_deceleration_defined
         }
         msg = std_msgs.msg.String()
         msg.data = json.dumps(my_dict)
         client_node.set_target_speed_publisher.publish(msg)
-        print(f"Sent set target speed to {actor.actor_id} successfully.")
+        client_node.get_logger().info(f"Sent set target speed to {actor.actor_id} successfully.")
 
 class ChangeLane(Action):
     def __init__(self, next_lane, lateral_velocity=1.0,
@@ -164,7 +142,7 @@ class ChangeLane(Action):
     def _do(self, actor:NPCVehicle, client_node, global_state):
         kinematic = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
         if not kinematic:
-            print(f'[ERROR] NPC {actor.actor_id} not found in the world state')
+            client_node.get_logger().info(f'[ERROR] NPC {actor.actor_id} not found in the world state')
             return
         current_pos = np.array(kinematic['pose']['position'])
         current_speed = np.linalg.norm(np.array(kinematic['twist']['linear']))
@@ -182,7 +160,7 @@ class ChangeLane(Action):
                 next_lane_wp_id = i
 
         if projection is None:
-            print(f'[ERROR] Invalid next lane for the lane change')
+            client_node.get_logger().info(f'[ERROR] Invalid next lane for the lane change')
             return
 
         # calculate waypoints
@@ -215,4 +193,4 @@ class ChangeLane(Action):
         msg = std_msgs.msg.String()
         msg.data = json.dumps(my_dict)
         client_node.follow_waypoints_publisher.publish(msg)
-        print(f"Sent lane change command to {actor.actor_id}.")
+        client_node.get_logger().info(f"Sent lane change command to {actor.actor_id}.")
