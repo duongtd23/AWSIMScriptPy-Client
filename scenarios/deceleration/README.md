@@ -47,9 +47,9 @@ In this code, the NPC vehicle is spawned but its movement is delayed until the e
 This is because we need some additional room for the NPC speeding up to `_speed` from 0, during which the ego vehicle is also moving forward.
 The trigger distance `my_dx` will ensure that once the NPC reaches `_speed`, the longitudinal distance between the two vehicles is exactly `dx0`.
 
-That is the main idea of implementing this deceleration scenarios. However, if running this specification, we will see that Autoware will reduce its speed far enough before reaching the NPC.
+That is the main idea of implementing these deceleration scenarios. However, if running this specification, we will see that Autoware will reduce its speed far enough before reaching the NPC.
 Thus, at the moment when NPC is triggered to move, the ego vehicle speed is actually much lower than `_speed`, and this naive implementation failed to reproduce the JAMA's deceleration scenario correctly.
-In other words, this is because Autoware is conservative, making us difficult to realize the longitudinal distance and ego's speed conditions correctly.
+In other words, this is because Autoware is conservative, making it difficult to realize the longitudinal distance and ego's speed conditions correctly.
 
 #### Dynamic spawning NPC
 Due to the above issue, we propose an alternative implementation that dynamically spawns the moving NPC vehicle when the ego vehicle has the target speed `_speed`.
@@ -77,10 +77,10 @@ npc1.add_action(SetTargetSpeed(target_speed=0,
                                 condition=actor_speed >= _speed))
 ```
 
-Here, insteading passing a concrete position and orientation to `SpawnNPCVehicle`, we pass the `pose_cal` function that calculates the spawn pose of the NPC dynamically based on the current position of the ego vehicle.
+Here, instead of passing a concrete position and orientation to `SpawnNPCVehicle`, we pass the `pose_cal` function that calculates the spawn pose of the NPC dynamically based on the current position of the ego vehicle.
 The calculation logic is simple, just return the position that is `2*_speed` meters ahead of the ego vehicle's front center along the ego's heading direction.
 Once the ego vehicle reaches the target speed `_speed`, the NPC vehicle is spawned accordingly.
-Then, we set it is moving at the target speed `_speed` immediately (with a very high acceleration value).
+Then, we set it to be moving at the target speed `_speed` immediately (with a very high acceleration value).
 Finally, the deceleration maneuver is triggered when the NPC speed reaches `_speed`.
 
 Although this setting does not happen in reality (due to the dynamic spawning), it can reproduce the challenge for the ADS as intended in the JAMA's deceleration scenario.
@@ -88,3 +88,8 @@ Although this setting does not happen in reality (due to the dynamic spawning), 
 ### Scenario Execution
 
 This is the recorded video of a deceleration scenario:
+
+
+
+https://github.com/user-attachments/assets/17a9fce1-d45c-480f-9df2-4a415b2b291a
+
