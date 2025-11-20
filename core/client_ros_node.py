@@ -75,7 +75,7 @@ class ClientNode(Node):
         qos_profile = QoSProfile(
             reliability=ReliabilityPolicy.RELIABLE,
             history=HistoryPolicy.KEEP_LAST,
-            depth=1
+            depth=10
         )
         # publishers
         self.awsim_scenario_publisher = self.create_publisher(
