@@ -4,7 +4,6 @@ from core.trigger_condition import *
 def make_deceleration_scenario(network,
                      ego_init_laneoffset,
                      ego_goal_laneoffset,
-                     npc_init_laneoffset,
                      _speed,
                      body_style=BodyStyle.HATCHBACK):
 
@@ -19,7 +18,6 @@ def make_deceleration_scenario(network,
     ego.add_action(SetVelocityLimit(_speed,one_shot=True))
 
     # NPC specification
-    _, _, npc_init_pos, npc_init_orient = network.parse_lane_offset(npc_init_laneoffset)
     npc1 = NPCVehicle("npc1", body_style)
     npc_root_to_back = npc1.size[0]/2 - npc1.center[0]
 
@@ -51,7 +49,6 @@ if __name__ == '__main__':
     scenario =  make_deceleration_scenario(scenario_manager.network,
                                     ego_init_laneoffset=LaneOffset('111', 0),
                                     ego_goal_laneoffset=LaneOffset('111', 210),
-                                    npc_init_laneoffset=LaneOffset('111', 70),
                                     _speed=30 / 3.6
                                     )
     scenario_manager.run([scenario])

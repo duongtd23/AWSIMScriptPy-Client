@@ -5,7 +5,7 @@ The following figure (from the JAMA Standard) illustrates an example of a decele
 
 ![Deceleration Scenario](../../assets/fig-decel.png)
 
-The ego vehicle (in blue) is following a lead NPC vehicle (in green) in the same lane. 
+The ego vehicle (in blue) is following a leading NPC vehicle (in green) in the same lane. 
 Both maintain a constant speed of $v$ and the initial longitudinal distance between them is $d_{x0} = 2*v$ (or 2 Time-Head-Way (THW)).
 At a certain moment, the lead NPC vehicle suddenly decelerates at a constant deceleration rate of $a$ until it comes to a complete stop.
 The relevant parameters for this scenario are:
