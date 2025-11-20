@@ -128,3 +128,7 @@ Although this setting does not happen in reality (due to the dynamic spawning), 
 
 This is the recorded video of a cut-out scenario:
 
+
+
+https://github.com/user-attachments/assets/77d977a1-f20a-4c5b-a254-408f3354c81e
+
