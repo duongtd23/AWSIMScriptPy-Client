@@ -30,7 +30,7 @@ ego.add_action(SetGoalPose(position=goal_pos, orientation=goal_orient))
 ego.add_action(ActivateAutonomousMode(condition=autonomous_mode_ready()))
 ego.add_action(SetVelocityLimit(30/3.6))
 
-_, source_lane, npc_init_pos, npc_init_orient = network.parse_lane_offset(LaneOffset('112', 70))
+_, source_lane, npc_init_pos, npc_init_orient = network.parse_lane_offset(LaneOffset('112', 80))
 npc1 = NPCVehicle("npc1", body_style=BodyStyle.HATCHBACK)
 next_lane = network.parse_lane('111')
 npc1.add_action(SpawnNPCVehicle(position=npc_init_pos, orientation=npc_init_orient))

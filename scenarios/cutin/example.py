@@ -6,7 +6,7 @@ if __name__ == '__main__':
     scenario =  make_cutin_scenario(scenario_manager.network,
                               ego_init_laneoffset=LaneOffset('111', 0),
                               ego_goal_laneoffset=LaneOffset('111', 130),
-                              npc_init_laneoffset=LaneOffset('112', 70),
+                              npc_init_laneoffset=LaneOffset('112', 80),
                               cutin_next_lane='111',
                               _ego_speed=30/3.6,
                               _npc_speed=10/3.6,

@@ -43,7 +43,9 @@ class Scenario:
                 self.subscribe_kinematics()
                 return
 
-            # time.sleep(0.2)
+            # depending on the PC performance, this value can be decreased or
+            # it should be increased
+            time.sleep(0.1)
 
     def terminate(self):
         self.running = False
