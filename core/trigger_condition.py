@@ -139,7 +139,7 @@ def end_lane(lane, network):
             return False
         npc = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
         if not npc:
-            print(f'[ERROR] NPC {actor.actor_id} not found')
+            # print(f'[ERROR] NPC {actor.actor_id} not found')
             return False
         pos = np.array(npc['pose']['position'])
         front_center_point = actor.get_front_center(pos, npc['pose']['rotation'][2])
@@ -162,11 +162,15 @@ def reach_point(point, network):
 
         npc = global_state['actor-kinematics']['vehicles'].get(actor.actor_id)
         if not npc:
-            print(f'[ERROR] NPC {actor.actor_id} not found')
+            # print(f'[ERROR] NPC {actor.actor_id} not found')
             return False
         pos = np.array(npc['pose']['position'])
         front_center_point = actor.get_front_center(pos, npc['pose']['rotation'][2])
-        return np.linalg.norm(front_center_point[:2] - nppoint[:2]) < 0.1
+        forward = front_center_point[:2] - pos[:2]
+        temp = front_center_point[:2] - nppoint[:2]
+        # we set a big-enough threshold distance threshold of 3m to account for the case
+        # when the speed is large and sleeping time between two cycles is significant
+        return np.linalg.norm(temp) < 3.0 and np.dot(forward, temp) >= 0
     return _cond
 
 distance_to_ego = Measurement(_distance_to_ego_value)
