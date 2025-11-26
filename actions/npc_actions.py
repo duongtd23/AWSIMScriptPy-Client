@@ -94,7 +94,6 @@ class FollowWaypoints(Action):
         waypoints = self.waypoints
         if waypoints is None:
             waypoints = self.waypoints_calculation_callback(actor, global_state)
-            client_node.get_logger().info(waypoints)
         is_speed_defined = self.target_speed is not None
         is_acceleration_defined = self.acceleration is not None
 
@@ -160,11 +159,15 @@ class ChangeLane(Action):
                 next_lane_wp_id = i
 
         if projection is None:
-            client_node.get_logger().info(f'[ERROR] Invalid next lane for the lane change')
+            client_node.get_logger().error(f'[ERROR] Invalid next lane for the lane change')
             return
 
         # calculate waypoints
         lateral_dis = np.linalg.norm(front_center_point[:2] - projection)
+        if current_speed < self.lateral_velocity:
+            client_node.get_logger().error(f'[ERROR] The lateral velocity is greater than the current speed. Ignore lane change.')
+            return
+
         long_speed = np.sqrt(current_speed ** 2 - self.lateral_velocity ** 2)
         long_dis = lateral_dis / self.lateral_velocity * long_speed
         direction = projection - self.next_lane.way_points[next_lane_wp_id][:2]
